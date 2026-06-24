@@ -1898,17 +1898,18 @@ async function saveAvailability() {
 // ============================================================
 
 const WIZARD_STEPS = [
-  { title: 'Welcome to PlenusOS! 🌿', subtitle: "Let's set up your practice — it takes about 3 minutes" },
-  { title: 'Your Practice',            subtitle: 'Tell us the basics about your business' },
-  { title: 'About You',                subtitle: 'Your professional details' },
+  { title: 'Meet Your Assistant',      subtitle: 'Your assistant is with you every step of the way' },
+  { title: 'Your Practice Type',       subtitle: 'Tell us what kind of work you do' },
+  { title: 'Place of Work',            subtitle: 'Where do you see your clients?' },
+  { title: 'Your Story',               subtitle: 'Four questions — your words, your practice' },
   { title: 'Your Accreditations',      subtitle: 'Professional memberships and registrations' },
-  { title: 'Your Niche',               subtitle: 'Who do you specialise in helping?' },
-  { title: 'Your Ideal Client',        subtitle: 'Describe your perfect client in detail' },
-  { title: 'Their Struggles',          subtitle: 'What do they need help with?' },
-  { title: 'Your Services',            subtitle: 'What do you offer? (edit freely later)' },
-  { title: 'Your Brand',               subtitle: 'Choose your visual style and tone' },
-  { title: 'Your Goals',               subtitle: 'What do you want PlenusOS to help you achieve?' },
-  { title: 'Almost done! 🎉',          subtitle: 'Optionally connect your API keys now — or skip and do it later in Settings' }
+  { title: 'Your Practice Philosophy', subtitle: 'What you believe shapes everything you build' },
+  { title: 'Your Ideal Client',        subtitle: 'Who do you do your best work with?' },
+  { title: 'Your Niche',               subtitle: 'The clearer your positioning, the easier everything becomes' },
+  { title: 'Your Services',            subtitle: 'What do you offer? You can edit these any time' },
+  { title: 'Your Brand',               subtitle: 'How your practice looks and feels to the world' },
+  { title: 'Your Website',             subtitle: 'Built from your answers — nothing generic' },
+  { title: 'Your Availability',        subtitle: 'When are you open for bookings?' }
 ];
 
 // ============================================================
@@ -3567,190 +3568,547 @@ function renderWizardStep() {
 }
 
 function getWizardStepHTML(step) {
+  const assistantName = wzData.assistant_name || 'your assistant';
+  const assistantGender = wzData.assistant_gender || 'female';
+  const assistantPronoun = assistantGender === 'male' ? 'He' : 'She';
+
   switch(step) {
+
+    // ── STEP 1 · MEET YOUR ASSISTANT ──────────────────────────────
     case 1: return `
-      <div style="text-align:center;padding:20px 0;">
-        <div style="font-size:64px;margin-bottom:16px;">🌿</div>
-        <p style="font-size:15px;color:var(--grey-600);max-width:400px;margin:0 auto;line-height:1.8;">
-          PlenusOS is your complete practice operating system — built specifically for UK nutritional therapists.<br><br>
-          We'll personalise your AI, website copy, and client tools to your exact practice and style.
-        </p>
-      </div>`;
-
-    case 2: return `
-      <div class="form-group"><label>Practice Name</label><input type="text" id="wz-practice-name" class="wz-input" placeholder="e.g. Helen Smith Nutrition"></div>
-      <div class="form-group"><label>Where do you work?</label>
-        <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:normal;"><input type="radio" name="wz-work-type" value="in_person" onchange="toggleWzLocation()" style="accent-color:var(--violet);"> In Person</label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:normal;"><input type="radio" name="wz-work-type" value="online" onchange="toggleWzLocation()" style="accent-color:var(--violet);"> Online</label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:normal;"><input type="radio" name="wz-work-type" value="hybrid" onchange="toggleWzLocation()" style="accent-color:var(--violet);"> Hybrid</label>
-        </div>
-        <div id="wz-location-wrap" style="display:none;">
-          <input type="text" id="wz-location" class="wz-input" placeholder="e.g. Wells, Somerset">
-        </div>
-      </div>
-      <div class="form-group"><label>Business Email</label><input type="email" id="wz-business-email" class="wz-input" placeholder="hello@yourpractice.co.uk"></div>
-      <div class="form-group"><label>Website (if you have one)</label><input type="text" id="wz-website" class="wz-input" placeholder="https://…"></div>`;
-
-    case 3: return `
-      <div class="form-group"><label>Your Full Name</label><input type="text" id="wz-name" class="wz-input" placeholder="e.g. Helen Smith"></div>
-      <div class="form-group"><label>Your Qualifications</label><input type="text" id="wz-qualifications" class="wz-input" placeholder="e.g. mBANT, CNHC Registered, DipION"></div>
-      <div class="grid-2">
-        <div class="form-group"><label>Years in Practice</label>
-          <select id="wz-years" class="wz-input"><option value="">Select…</option><option>Less than 1 year</option><option>1–2 years</option><option>3–5 years</option><option>6–10 years</option><option>10+ years</option></select>
-        </div>
-        <div class="form-group"><label>Phone (optional)</label><input type="tel" id="wz-phone" class="wz-input" placeholder="+44 …"></div>
-      </div>`;
-
-    case 4: return `
-      <p style="font-size:13px;color:var(--grey-500);margin-bottom:14px;">Select all that apply</p>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        ${[
-          {key:'bant', label:'BANT', desc:'British Association for Nutrition & Lifestyle Medicine'},
-          {key:'cnhc', label:'CNHC', desc:'Complementary & Natural Healthcare Council'},
-          {key:'ifm',  label:'IFM',  desc:'Institute for Functional Medicine'},
-          {key:'ico',  label:'ICO',  desc:'ICO Registered — required for processing health data under UK GDPR'}
-        ].map(m => `
-          <label style="display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--grey-200);border-radius:10px;cursor:pointer;">
-            <input type="checkbox" id="wz-mb-${m.key}" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--violet);">
-            <div><div style="font-weight:700;font-size:13px;">${m.label}</div><div style="font-size:12px;color:var(--grey-500);">${m.desc}</div></div>
-          </label>`).join('')}
-      </div>`;
-
-    case 5: return `
-      <p style="font-size:13px;color:var(--grey-500);margin-bottom:14px;">Select all your specialisms</p>
-      <div class="grid-2">
-        ${['Gut health & IBS','Hormonal health','Fatigue & energy','Weight management',
-           'Autoimmune conditions','Mental health & mood','Women\'s health','Men\'s health',
-           'Children\'s nutrition','Sports & performance','Cancer support','Thyroid & endocrine']
-          .map(n => `
-          <label style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--grey-200);border-radius:8px;cursor:pointer;font-size:13px;">
-            <input type="checkbox" data-niche="${n}" class="wz-niche" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--violet);"> ${n}
-          </label>`).join('')}
-      </div>`;
-
-    case 6: return `
-      <div class="form-group">
-        <label>Describe your ideal client</label>
-        <textarea id="wz-ideal-client" class="wz-input" style="min-height:90px;" placeholder="e.g. A woman in her 30s–50s juggling a demanding career and family, struggling with fatigue and digestive issues…"></textarea>
-      </div>
-      <div class="form-group">
-        <label>Typical age range</label>
-        <select id="wz-age-range" class="wz-input">
-          <option>25–35</option><option selected>35–45</option><option>45–55</option><option>55+</option><option>Mixed ages</option>
-        </select>
-      </div>`;
-
-    case 7: return `
-      <div class="form-group">
-        <label>What do your clients typically struggle with?</label>
-        <textarea id="wz-struggles" class="wz-input" style="min-height:130px;" placeholder="e.g. Constant bloating, no energy by 3pm, can't sleep despite being exhausted, weight creeping up despite trying to eat well…"></textarea>
-        <div style="font-size:12px;color:var(--grey-400);margin-top:6px;">This personalises all your AI-generated content to speak directly to your clients' real problems.</div>
-      </div>`;
-
-    case 8: return `
-      <p style="font-size:13px;color:var(--grey-500);margin-bottom:14px;">Add up to 3 services — you can edit or add more later</p>
-      ${[1,2,3].map(i => `
-        <div style="border:1px solid var(--grey-200);border-radius:10px;padding:14px;margin-bottom:10px;">
-          <div style="font-size:12px;font-weight:700;color:var(--grey-500);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Service ${i}</div>
-          <div class="grid-2" style="gap:10px;">
-            <div class="form-group" style="margin-bottom:8px;"><label>Name</label><input type="text" id="wz-svc${i}-name" class="wz-input" placeholder="${i===1?'Initial Consultation':i===2?'12-Week Programme':'Group Course or Workshop'}"></div>
-            <div class="form-group" style="margin-bottom:8px;"><label>Price (£)</label><input type="number" id="wz-svc${i}-price" class="wz-input" placeholder="${i===1?'85':i===2?'497':'147'}"></div>
+      <p style="font-size:14px;color:var(--grey-600);margin-bottom:20px;line-height:1.7;">
+        Your assistant is with you throughout PlenusOS — answering questions, generating content, and helping you present your practice at its best. Start by choosing who they are.
+      </p>
+      <div style="margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:10px;">Choose your assistant's gender</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div id="wz-gender-female" class="wz-card-opt ${!wzData.assistant_gender || wzData.assistant_gender==='female' ? 'selected' : ''}"
+               onclick="selectAssistantGender('female')"
+               style="padding:20px;border:2px solid var(--grey-200);border-radius:12px;cursor:pointer;text-align:center;transition:all 0.2s;">
+            <div style="font-size:36px;margin-bottom:8px;">👩</div>
+            <div style="font-weight:700;font-size:14px;">Female</div>
           </div>
-          <div class="form-group" style="margin-bottom:0;"><label>Duration / Format</label><input type="text" id="wz-svc${i}-duration" class="wz-input" placeholder="${i===1?'60 mins · 1-to-1 · Online or in-person':i===2?'12 weeks · Weekly 1-to-1 sessions':'6 weeks · Online self-paced'}"></div>
-        </div>`).join('')}`;
-
-    case 9: {
-      const palettes = [
-        {key:'charcoal-violet', label:'Charcoal & Violet', colors:['#0B1538','#2C00CB'], desc:'Professional & bold — the default'},
-        {key:'forest-gold',     label:'Forest & Gold',     colors:['#1B4332','#D97706'], desc:'Natural & warm — earthy feel'},
-        {key:'ocean-coral',     label:'Ocean & Coral',     colors:['#0F4C75','#FF6B6B'], desc:'Fresh & energetic — modern'},
-        {key:'rose-stone',      label:'Rose & Stone',      colors:['#831843','#6B7280'], desc:'Feminine & calm — soft luxury'}
-      ];
-      return `
-        <div class="grid-2" style="margin-bottom:18px;">
-          ${palettes.map(p => `
-            <div id="wz-palette-${p.key}" class="wz-palette-opt" onclick="selectPalette('${p.key}')">
-              <div style="display:flex;gap:8px;margin-bottom:8px;">
-                ${p.colors.map(c => `<div style="width:28px;height:28px;border-radius:6px;background:${c};"></div>`).join('')}
-              </div>
-              <div style="font-weight:700;font-size:13px;margin-bottom:2px;">${p.label}</div>
-              <div style="font-size:11px;color:var(--grey-500);">${p.desc}</div>
-            </div>`).join('')}
+          <div id="wz-gender-male" class="wz-card-opt ${wzData.assistant_gender==='male' ? 'selected' : ''}"
+               onclick="selectAssistantGender('male')"
+               style="padding:20px;border:2px solid var(--grey-200);border-radius:12px;cursor:pointer;text-align:center;transition:all 0.2s;">
+            <div style="font-size:36px;margin-bottom:8px;">👨</div>
+            <div style="font-weight:700;font-size:14px;">Male</div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Tone of Voice</label>
-          <select id="wz-tone" class="wz-input">
-            <option value="warm">Warm & nurturing — feel like a trusted friend</option>
-            <option value="professional">Professional & clinical — evidence-led</option>
-            <option value="empowering">Empowering & motivating — action-focused</option>
-            <option value="holistic">Holistic & mindful — whole-person approach</option>
-          </select>
+      </div>
+      <div class="form-group">
+        <label style="font-weight:600;">Give your assistant a name</label>
+        <input type="text" id="wz-assistant-name" class="wz-input"
+               placeholder="E.g. Rob, Jane, or anything that feels right"
+               value="${wzData.assistant_name || ''}"
+               oninput="previewAssistantIntro()">
+        <div id="wz-assistant-preview" style="margin-top:14px;padding:14px 16px;background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border-left:3px solid var(--violet);border-radius:8px;font-size:13px;color:var(--charcoal);line-height:1.6;display:${wzData.assistant_name ? 'block' : 'none'};">
+          ${wzData.assistant_name ? `"Hello — I'm ${wzData.assistant_name}. I'm here to help you build and grow your practice. Let's get started."` : ''}
+        </div>
+      </div>`;
+
+    // ── STEP 2 · PRACTICE TYPE ─────────────────────────────────────
+    case 2: {
+      const categories = [
+        { label: 'Clinical & Therapeutic', types: ['Nutritional Therapy','Functional Medicine','Naturopathy','Herbal Medicine','Acupuncture','Homeopathy','Osteopathy','Chiropractic','Physiotherapy','Psychotherapy','Counselling','CBT & Talking Therapies'] },
+        { label: 'Recovery & Mental Health', types: ['Addiction Recovery','Alcohol Recovery','Drug Recovery','Eating Disorder Support','Trauma Recovery','Anxiety & Depression Support','Grief Counselling'] },
+        { label: "Women's Health", types: ["Fertility & IVF Support","Pregnancy & Postnatal","Menopause Support","PCOS & Hormonal Health","Endometriosis Support","Women's Wellbeing"] },
+        { label: 'Movement & Body', types: ['Personal Training','Sports Nutrition','Sports Therapy','Yoga','Pilates','Dance Therapy','Somatic Therapy','Breathwork'] },
+        { label: 'Holistic & Integrative', types: ['Ayurveda','Traditional Chinese Medicine','Energy Healing','Reflexology','Aromatherapy','Crystal Therapy','Sound Healing','Kinesiology'] },
+        { label: 'Life & Business', types: ['Life Coaching','Health Coaching','Wellness Coaching','Executive Coaching','Business Coaching','Mindset Coaching','NLP Practitioner'] }
+      ];
+      const selected = wzData.practice_types || [];
+      return `
+        <p style="font-size:13px;color:var(--grey-500);margin-bottom:16px;">Select all that apply — your assistant's knowledge adapts to your practice.</p>
+        <div style="max-height:340px;overflow-y:auto;padding-right:4px;">
+          ${categories.map(cat => `
+            <div style="margin-bottom:18px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--violet);margin-bottom:8px;">${cat.label}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                ${cat.types.map(t => {
+                  const sel = selected.includes(t);
+                  return `<button type="button" class="wz-type-chip ${sel ? 'selected' : ''}"
+                    onclick="togglePracticeType(this,'${t}')"
+                    style="padding:6px 12px;border-radius:20px;border:1.5px solid ${sel ? 'var(--violet)' : 'var(--grey-200)'};background:${sel ? '#F5F3FF' : '#fff'};color:${sel ? 'var(--violet)' : 'var(--grey-600)'};font-size:12px;font-weight:${sel ? '700' : '500'};cursor:pointer;transition:all 0.15s;">${t}</button>`;
+                }).join('')}
+              </div>
+            </div>`).join('')}
+          <div style="margin-bottom:18px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--grey-400);margin-bottom:8px;">Other</div>
+            <input type="text" id="wz-practice-type-other" class="wz-input" placeholder="Describe your practice if it's not listed above" value="${wzData.practice_type_other || ''}">
+          </div>
         </div>`;
     }
 
-    case 10: return `
-      <p style="font-size:13px;color:var(--grey-500);margin-bottom:14px;">Select up to 3 — PlenusOS will prioritise these features for you</p>
-      <div class="grid-2">
-        ${['Get more clients','Automate my admin','Create online programmes','Build a community',
-           'Improve client outcomes','Grow on social media','Launch a membership','Write better content']
-          .map(g => `
-          <label style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--grey-200);border-radius:8px;cursor:pointer;font-size:13px;">
-            <input type="checkbox" data-goal="${g}" class="wz-goal" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--violet);"> ${g}
-          </label>`).join('')}
+    // ── STEP 3 · PLACE OF WORK ─────────────────────────────────────
+    case 3: return `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+        ${[
+          { key:'in_person', icon:'🏢', label:'In Person', desc:'You see clients at a clinic or practice room' },
+          { key:'online',    icon:'💻', label:'Online',    desc:'All sessions delivered remotely via video' },
+          { key:'hybrid',    icon:'🔄', label:'Hybrid',    desc:'A mix of in-person and online sessions' }
+        ].map(opt => {
+          const sel = wzData.work_location_type === opt.key;
+          return `
+          <div id="wz-loc-${opt.key}" onclick="selectWorkLocation('${opt.key}')"
+               style="padding:18px 14px;border:2px solid ${sel ? 'var(--violet)' : 'var(--grey-200)'};background:${sel ? '#F5F3FF' : '#fff'};border-radius:12px;cursor:pointer;text-align:center;transition:all 0.2s;">
+            <div style="font-size:28px;margin-bottom:8px;">${opt.icon}</div>
+            <div style="font-weight:700;font-size:13px;margin-bottom:4px;">${opt.label}</div>
+            <div style="font-size:11px;color:var(--grey-500);line-height:1.4;">${opt.desc}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div id="wz-city-wrap" style="display:${wzData.work_location_type && wzData.work_location_type !== 'online' ? 'block' : 'none'};">
+        <div class="form-group">
+          <label>Your town or city</label>
+          <input type="text" id="wz-location-city" class="wz-input" placeholder="e.g. Wells, Bath, London" value="${wzData.work_location_city || ''}">
+          <div style="font-size:11px;color:var(--grey-400);margin-top:4px;">Town level only — not your full address.</div>
+        </div>
       </div>`;
 
+    // ── STEP 4 · YOUR STORY ────────────────────────────────────────
+    case 4: {
+      const q = wzData.story_q || 1;
+      const questions = [
+        { id:'story_q1', q:'What brought you to this work?', hint:'Your origin story — what happened, what shifted, what called you here.' },
+        { id:'story_q2', q:'What do you most want people to understand about your approach?', hint:'What makes how you work different from what they might expect.' },
+        { id:'story_q3', q:'What do your clients say changed for them after working with you?', hint:'In their words if possible — this is the outcome people are really buying.' },
+        { id:'story_q4', q:'What would you never want a potential client to misunderstand about what you do?', hint:'The thing that matters enough to set the record straight.' }
+      ];
+      const current = questions[q - 1];
+      const allAnswered = questions.every(qu => wzData[qu.id]);
+      return `
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;gap:6px;margin-bottom:16px;">
+            ${questions.map((qu, i) => {
+              const n = i + 1;
+              const done = !!wzData[qu.id];
+              const active = n === q;
+              return `<div onclick="goStoryQ(${n})" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;
+                border:2px solid ${active ? 'var(--violet)' : done ? 'var(--violet)' : 'var(--grey-200)'};
+                background:${active ? 'var(--violet)' : done ? '#F5F3FF' : '#fff'};
+                color:${active ? '#fff' : done ? 'var(--violet)' : 'var(--grey-400)'};">${done && !active ? '✓' : n}</div>`;
+            }).join('')}
+            <div style="flex:1;display:flex;align-items:center;"><div style="height:1px;background:var(--grey-100);flex:1;margin:0 4px;"></div></div>
+          </div>
+          <div style="background:#F5F3FF;border-left:3px solid var(--violet);padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:14px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--violet);margin-bottom:4px;">${assistantName} asks</div>
+            <div style="font-size:15px;font-weight:600;color:var(--charcoal);line-height:1.5;">${current.q}</div>
+            <div style="font-size:12px;color:var(--grey-500);margin-top:4px;line-height:1.5;">${current.hint}</div>
+          </div>
+          <textarea id="wz-story-current" class="wz-input" style="min-height:120px;"
+            placeholder="Take your time — your own words are always best.">${wzData[current.id] || ''}</textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+            <div style="display:flex;gap:8px;">
+              ${q > 1 ? `<button class="btn btn-secondary" onclick="goStoryQ(${q-1})" style="padding:8px 14px;font-size:12px;">← Previous</button>` : ''}
+              ${q < 4 ? `<button class="btn btn-primary" onclick="saveStoryAndNext(${q})" style="padding:8px 14px;font-size:12px;">Next question →</button>` : ''}
+            </div>
+            ${allAnswered ? `<button class="btn" onclick="generateAboutDraft()" style="padding:8px 16px;font-size:12px;background:linear-gradient(135deg,var(--violet),var(--violet-light));color:#fff;border:none;border-radius:8px;cursor:pointer;">✨ Generate About section</button>` : ''}
+          </div>
+        </div>
+        <div id="wz-about-draft" style="display:${wzData.about_draft ? 'block' : 'none'};margin-top:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--grey-400);margin-bottom:8px;">First draft — edit freely</div>
+          <textarea id="wz-about-text" class="wz-input" style="min-height:100px;">${wzData.about_draft || ''}</textarea>
+        </div>`;
+    }
+
+    // ── STEP 5 · YOUR ACCREDITATIONS ──────────────────────────────
+    case 5: {
+      const accreds = [
+        { key:'bant',   label:'BANT',          desc:'British Association for Nutrition & Lifestyle Medicine' },
+        { key:'cnhc',   label:'CNHC',          desc:'Complementary & Natural Healthcare Council' },
+        { key:'icf',    label:'ICF',            desc:'International Coaching Federation' },
+        { key:'ukcp',   label:'UKCP',           desc:'UK Council for Psychotherapy' },
+        { key:'bacp',   label:'BACP',           desc:'British Association for Counselling & Psychotherapy' },
+        { key:'anp',    label:'ANP',            desc:'Association of Naturopathic Practitioners' },
+        { key:'ntc',    label:'NTC',            desc:'Nutritional Therapy Council' },
+        { key:'reps',   label:'REPs',           desc:'Register of Exercise Professionals' },
+        { key:'yoga',   label:'Yoga Alliance',  desc:'Yoga Alliance Professionals UK' },
+        { key:'ifm',    label:'IFM',            desc:'Institute for Functional Medicine' },
+        { key:'ico',    label:'ICO',            desc:'ICO Registered (UK GDPR — required for health data)' },
+        { key:'cma',    label:'CMA',            desc:'Complementary Medical Association' }
+      ];
+      const saved = wzData.accreditations || {};
+      return `
+        <p style="font-size:13px;color:var(--grey-500);margin-bottom:14px;">Select all that apply. Tick "In progress" for anything you're working toward.</p>
+        <div style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;padding-right:4px;">
+          ${accreds.map(a => {
+            const checked = !!saved[a.key];
+            const inprog = !!saved[a.key + '_inprogress'];
+            return `
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--grey-200);border-radius:10px;">
+              <input type="checkbox" id="wz-acc-${a.key}" ${checked ? 'checked' : ''} style="width:17px;height:17px;flex-shrink:0;accent-color:var(--violet);">
+              <div style="flex:1;">
+                <div style="font-weight:700;font-size:13px;">${a.label}</div>
+                <div style="font-size:11px;color:var(--grey-500);">${a.desc}</div>
+              </div>
+              <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--grey-500);white-space:nowrap;font-weight:normal;cursor:pointer;">
+                <input type="checkbox" id="wz-acc-${a.key}-ip" ${inprog ? 'checked' : ''} style="width:13px;height:13px;accent-color:var(--violet-light);"> In progress
+              </label>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="form-group" style="margin-top:14px;">
+          <label style="font-size:12px;">Other accreditations or memberships</label>
+          <input type="text" id="wz-acc-other" class="wz-input" placeholder="e.g. mBANT, DipION, BSc Nutritional Medicine…" value="${wzData.accreditations_other || ''}">
+        </div>`;
+    }
+
+    // ── STEP 6 · YOUR PRACTICE PHILOSOPHY ─────────────────────────
+    case 6: {
+      const q = wzData.philosophy_q || 1;
+      const questions = [
+        { id:'philosophy_q1', q:'What do you believe about the people you help?', hint:'What is true about your clients that most people overlook or underestimate?' },
+        { id:'philosophy_q2', q:'What do you believe about the kind of change your work makes possible?', hint:'Not what you do, but what becomes possible because of it.' },
+        { id:'philosophy_q3', q:'What does working with you feel like?', hint:'The experience of being in your care — not the process, the feeling.' },
+        { id:'philosophy_q4', q:'What do you want someone to feel within 30 seconds of landing on your website?', hint:'One word or a phrase — the emotional first impression you\'re aiming for.' },
+        { id:'philosophy_q5', q:'What would you never want to be known for?', hint:'The line you would never cross, or the reputation you\'d hate to earn.' }
+      ];
+      const current = questions[q - 1];
+      const allAnswered = questions.every(qu => wzData[qu.id]);
+      return `
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;gap:6px;margin-bottom:16px;">
+            ${questions.map((qu, i) => {
+              const n = i + 1;
+              const done = !!wzData[qu.id];
+              const active = n === q;
+              return `<div onclick="goPhilosophyQ(${n})" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;
+                border:2px solid ${active ? 'var(--violet)' : done ? 'var(--violet)' : 'var(--grey-200)'};
+                background:${active ? 'var(--violet)' : done ? '#F5F3FF' : '#fff'};
+                color:${active ? '#fff' : done ? 'var(--violet)' : 'var(--grey-400)'};">${done && !active ? '✓' : n}</div>`;
+            }).join('')}
+          </div>
+          <div style="background:#F5F3FF;border-left:3px solid var(--violet);padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:14px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--violet);margin-bottom:4px;">${assistantName} asks</div>
+            <div style="font-size:15px;font-weight:600;color:var(--charcoal);line-height:1.5;">${current.q}</div>
+            <div style="font-size:12px;color:var(--grey-500);margin-top:4px;line-height:1.5;">${current.hint}</div>
+          </div>
+          <textarea id="wz-philosophy-current" class="wz-input" style="min-height:110px;"
+            placeholder="Your answer…">${wzData[current.id] || ''}</textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+            <div style="display:flex;gap:8px;">
+              ${q > 1 ? `<button class="btn btn-secondary" onclick="goPhilosophyQ(${q-1})" style="padding:8px 14px;font-size:12px;">← Previous</button>` : ''}
+              ${q < 5 ? `<button class="btn btn-primary" onclick="savePhilosophyAndNext(${q})" style="padding:8px 14px;font-size:12px;">Next question →</button>` : ''}
+            </div>
+            ${allAnswered ? `<button class="btn" onclick="generatePhilosophyDraft()" style="padding:8px 16px;font-size:12px;background:linear-gradient(135deg,var(--violet),var(--violet-light));color:#fff;border:none;border-radius:8px;cursor:pointer;">✨ Generate philosophy statement</button>` : ''}
+          </div>
+        </div>
+        <div id="wz-philosophy-draft" style="display:${wzData.philosophy_statement ? 'block' : 'none'};margin-top:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--grey-400);margin-bottom:8px;">First draft — edit freely</div>
+          <textarea id="wz-philosophy-text" class="wz-input" style="min-height:90px;">${wzData.philosophy_statement || ''}</textarea>
+        </div>`;
+    }
+
+    // ── STEP 7 · YOUR IDEAL CLIENT ─────────────────────────────────
+    case 7: {
+      const archetypes = [
+        { key:'exhausted_achiever',   label:'The Exhausted High Achiever',  desc:'Driven, capable, running on empty. Knows something has to change.' },
+        { key:'reluctant_changer',    label:'The Reluctant Changer',        desc:'Referred or nudged by someone else. Sceptical but open.' },
+        { key:'researcher',           label:'The Researcher',               desc:'Has read everything. Comes to you with questions and expectations.' },
+        { key:'emergency_fixer',      label:'The Emergency Fixer',          desc:'A health event has made this urgent. Ready to act now.' },
+        { key:'sceptic',              label:'The Sceptic',                  desc:'Unconvinced by holistic approaches. Needs evidence and logic.' },
+        { key:'committed_transformer',label:'The Committed Transformer',    desc:'All in. Motivated, engaged, follows through. Your favourite client.' },
+        { key:'quietly_struggling',   label:'The Quietly Struggling',       desc:'Coping on the outside, exhausted on the inside. Hard to reach.' },
+        { key:'returning_client',     label:'The Returning Client',         desc:'Worked with you before. Ready for the next level.' }
+      ];
+      const selected = wzData.client_archetypes || [];
+      const activeAvatar = wzData.active_avatar || 0;
+      const avatars = wzData.client_avatars || [{ name:'', age_range:'', primary_goal:'', primary_pain:'', main_objection:'', buying_trigger:'' }];
+      return `
+        <div style="margin-bottom:20px;">
+          <div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:10px;">Which of these feel most like your clients? <span style="color:var(--grey-400);font-weight:400;">(select all that apply)</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;">
+            ${archetypes.map(a => {
+              const sel = selected.includes(a.key);
+              return `
+              <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid ${sel ? 'var(--violet)' : 'var(--grey-200)'};background:${sel ? '#F5F3FF' : '#fff'};border-radius:10px;cursor:pointer;transition:all 0.15s;">
+                <input type="checkbox" data-archetype="${a.key}" class="wz-archetype" ${sel ? 'checked' : ''} style="width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--violet);">
+                <div>
+                  <div style="font-weight:700;font-size:13px;">${a.label}</div>
+                  <div style="font-size:11px;color:var(--grey-500);margin-top:2px;">${a.desc}</div>
+                </div>
+              </label>`;
+            }).join('')}
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--grey-100);padding-top:16px;">
+          <div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:12px;">Build your ideal client avatar</div>
+          <div class="grid-2" style="gap:10px;">
+            <div class="form-group" style="margin-bottom:8px;"><label>Name <span style="color:var(--grey-400);font-weight:400;">(fictional)</span></label><input type="text" id="wz-av-name" class="wz-input" placeholder="e.g. Sarah" value="${avatars[0].name || ''}"></div>
+            <div class="form-group" style="margin-bottom:8px;"><label>Age range</label>
+              <select id="wz-av-age" class="wz-input">
+                ${['25–35','35–45','45–55','55+','Mixed ages'].map(a => `<option ${avatars[0].age_range===a?'selected':''}>${a}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:8px;"><label>Primary goal</label><input type="text" id="wz-av-goal" class="wz-input" placeholder="What do they most want to achieve?" value="${avatars[0].primary_goal || ''}"></div>
+          <div class="form-group" style="margin-bottom:8px;"><label>Primary pain</label><input type="text" id="wz-av-pain" class="wz-input" placeholder="What keeps them stuck or suffering right now?" value="${avatars[0].primary_pain || ''}"></div>
+          <div class="form-group" style="margin-bottom:0;"><label>Main objection</label><input type="text" id="wz-av-objection" class="wz-input" placeholder="The reason they hesitate to book" value="${avatars[0].main_objection || ''}"></div>
+        </div>`;
+    }
+
+    // ── STEP 8 · YOUR NICHE ────────────────────────────────────────
+    case 8: {
+      const q = wzData.niche_q || 1;
+      const questions = [
+        { id:'niche_q1', q:'Who specifically do you help?', hint:'Be as specific as you can — age, life stage, gender if relevant, circumstance.' },
+        { id:'niche_q2', q:'What is the main problem you solve for them?', hint:'The thing they come to you for. Not the solution — the problem as they experience it.' },
+        { id:'niche_q3', q:'What is the outcome they are hoping for?', hint:'What does success look and feel like for them, in their own terms?' },
+        { id:'niche_q4', q:'Why you, specifically? What is your particular angle or advantage?', hint:'Your background, your method, your lived experience — what makes your version of this work different.' }
+      ];
+      const current = questions[q - 1];
+      const allAnswered = questions.every(qu => wzData[qu.id]);
+      return `
+        <div style="margin-bottom:16px;">
+          <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#92400E;line-height:1.5;">
+            💡 Not sure yet? That's fine — answer as best you can and tick "I'm not sure yet" at the bottom. You can refine this any time.
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:16px;">
+            ${questions.map((qu, i) => {
+              const n = i + 1;
+              const done = !!wzData[qu.id];
+              const active = n === q;
+              return `<div onclick="goNicheQ(${n})" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;
+                border:2px solid ${active ? 'var(--violet)' : done ? 'var(--violet)' : 'var(--grey-200)'};
+                background:${active ? 'var(--violet)' : done ? '#F5F3FF' : '#fff'};
+                color:${active ? '#fff' : done ? 'var(--violet)' : 'var(--grey-400)'};">${done && !active ? '✓' : n}</div>`;
+            }).join('')}
+          </div>
+          <div style="background:#F5F3FF;border-left:3px solid var(--violet);padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:14px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--violet);margin-bottom:4px;">${assistantName} asks</div>
+            <div style="font-size:15px;font-weight:600;color:var(--charcoal);line-height:1.5;">${current.q}</div>
+            <div style="font-size:12px;color:var(--grey-500);margin-top:4px;line-height:1.5;">${current.hint}</div>
+          </div>
+          <textarea id="wz-niche-current" class="wz-input" style="min-height:100px;"
+            placeholder="Your answer…">${wzData[current.id] || ''}</textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+            <div style="display:flex;gap:8px;">
+              ${q > 1 ? `<button class="btn btn-secondary" onclick="goNicheQ(${q-1})" style="padding:8px 14px;font-size:12px;">← Previous</button>` : ''}
+              ${q < 4 ? `<button class="btn btn-primary" onclick="saveNicheAndNext(${q})" style="padding:8px 14px;font-size:12px;">Next question →</button>` : ''}
+            </div>
+            ${allAnswered ? `<button class="btn" onclick="generateNicheDraft()" style="padding:8px 16px;font-size:12px;background:linear-gradient(135deg,var(--violet),var(--violet-light));color:#fff;border:none;border-radius:8px;cursor:pointer;">✨ Generate niche statement</button>` : ''}
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--grey-500);font-weight:normal;cursor:pointer;">
+            <input type="checkbox" id="wz-niche-unsure" ${wzData.niche_provisional ? 'checked' : ''} style="accent-color:var(--violet-light);"> I'm not sure yet — save as draft
+          </label>
+        </div>
+        <div id="wz-niche-draft" style="display:${wzData.niche_statement ? 'block' : 'none'};margin-top:14px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--grey-400);margin-bottom:8px;">Your niche statement — edit freely</div>
+          <textarea id="wz-niche-text" class="wz-input" style="min-height:80px;">${wzData.niche_statement || ''}</textarea>
+        </div>`;
+    }
+
+    // ── STEP 9 · YOUR SERVICES ─────────────────────────────────────
+    case 9: return `
+      <p style="font-size:13px;color:var(--grey-500);margin-bottom:16px;">Add your core services. You can add, edit, or remove these any time in Settings.</p>
+      <div id="wz-services-list">
+        ${(wzData.services && wzData.services.length ? wzData.services : [{}]).map((svc, i) => `
+          <div class="wz-service-card" style="border:1px solid var(--grey-200);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--grey-400);margin-bottom:12px;">Service ${i+1}</div>
+            <div class="grid-2" style="gap:10px;">
+              <div class="form-group" style="margin-bottom:8px;"><label>Service name</label><input type="text" class="wz-input wz-svc-name" placeholder="${i===0?'Initial Consultation':i===1?'12-Week Programme':'Group Workshop'}" value="${svc.name||''}"></div>
+              <div class="form-group" style="margin-bottom:8px;"><label>Duration</label><input type="text" class="wz-input wz-svc-duration" placeholder="${i===0?'60 mins':i===1?'12 weeks':'6 weeks'}" value="${svc.duration||''}"></div>
+            </div>
+            <div class="form-group" style="margin-bottom:8px;"><label>Description <span style="color:var(--grey-400);font-weight:400;">— optional, or use ✨ Generate below</span></label>
+              <textarea class="wz-input wz-svc-desc" style="min-height:60px;" placeholder="What does this service involve?">${svc.description||''}</textarea>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Delivery</label>
+              <select class="wz-input wz-svc-delivery">
+                ${['Online','In Person','Hybrid','Self-paced','Group'].map(d => `<option ${svc.delivery===d?'selected':''}>${d}</option>`).join('')}
+              </select>
+            </div>
+          </div>`).join('')}
+      </div>
+      <button type="button" onclick="addWizardService()" style="width:100%;padding:10px;border:1.5px dashed var(--grey-300);border-radius:10px;background:none;color:var(--grey-500);font-size:13px;cursor:pointer;">+ Add another service</button>`;
+
+    // ── STEP 10 · YOUR BRAND ───────────────────────────────────────
+    case 10: {
+      const feelWords = ['Warm','Clinical','Grounded','Energising','Calm','Bold','Gentle','Professional','Nurturing','Empowering','Elegant','Approachable','Honest','Transformative','Fierce','Soft'];
+      const ethicsWords = ['Trauma-informed','Evidence-based','Holistic','Inclusive','Body-positive','Neurodiversity-affirming','LGBTQ+ friendly','Culturally sensitive','Anti-diet','Integrative'];
+      const selFeel = wzData.brand_feel || [];
+      const selEthics = wzData.brand_ethics || [];
+      const palettes = [
+        { key:'navy-violet',      label:'Navy & Violet',       swatches:['#0B1538','#2C00CB','#8F61F7','#AB86FA'], desc:'Bold, professional, trustworthy' },
+        { key:'forest-gold',      label:'Forest & Gold',       swatches:['#1B4332','#2D6A4F','#D97706','#FCD34D'], desc:'Natural, grounded, warm' },
+        { key:'ocean-sky',        label:'Ocean & Sky',         swatches:['#0F4C75','#1B6CA8','#38BDF8','#BAE6FD'], desc:'Fresh, calm, modern' },
+        { key:'rose-stone',       label:'Rose & Stone',        swatches:['#831843','#BE185D','#9CA3AF','#F3F4F6'], desc:'Feminine, elegant, soft luxury' },
+        { key:'earth-terracotta', label:'Earth & Terracotta',  swatches:['#78350F','#B45309','#C2410C','#FED7AA'], desc:'Earthy, honest, grounded' },
+        { key:'slate-sage',       label:'Slate & Sage',        swatches:['#334155','#475569','#6B7280','#4ADE80'], desc:'Calm, clinical, reassuring' },
+        { key:'blush-gold',       label:'Blush & Gold',        swatches:['#4A1942','#C084FC','#F9A8D4','#FDE68A'], desc:'Soft, luxurious, feminine warmth' },
+        { key:'midnight-teal',    label:'Midnight & Teal',     swatches:['#0F172A','#0F766E','#2DD4BF','#CCFBF1'], desc:'Deep, calming, premium' }
+      ];
+      const selPalette = wzData.brand_palette;
+      const fonts = [
+        { key:'modern-serif',  heading:'Playfair Display', body:'Inter',        desc:'Elegant authority' },
+        { key:'clean-sans',    heading:'Montserrat',       body:'Open Sans',    desc:'Crisp & approachable' },
+        { key:'warm-humanist', heading:'Cormorant Garamond',body:'Lato',        desc:'Warm & literary' },
+        { key:'bold-modern',   heading:'DM Serif Display', body:'DM Sans',      desc:'Strong & contemporary' }
+      ];
+      const selFont = wzData.brand_fonts;
+      return `
+        <div style="max-height:380px;overflow-y:auto;padding-right:4px;">
+          <div style="margin-bottom:20px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--charcoal);margin-bottom:10px;">Feel & values <span style="color:var(--grey-400);font-weight:400;">— select all that resonate</span></div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+              ${feelWords.map(w => {
+                const sel = selFeel.includes(w);
+                return `<button type="button" onclick="toggleBrandFeel(this,'${w}')" style="padding:6px 14px;border-radius:20px;border:1.5px solid ${sel?'var(--violet)':'var(--grey-200)'};background:${sel?'#F5F3FF':'#fff'};color:${sel?'var(--violet)':'var(--grey-600)'};font-size:12px;font-weight:${sel?'700':'500'};cursor:pointer;transition:all 0.15s;">${w}</button>`;
+              }).join('')}
+            </div>
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--charcoal);margin-bottom:10px;">Ethics & values</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              ${ethicsWords.map(w => {
+                const sel = selEthics.includes(w);
+                return `<button type="button" onclick="toggleBrandEthics(this,'${w}')" style="padding:6px 14px;border-radius:20px;border:1.5px solid ${sel?'#059669':'var(--grey-200)'};background:${sel?'#ECFDF5':'#fff'};color:${sel?'#059669':'var(--grey-600)'};font-size:12px;font-weight:${sel?'700':'500'};cursor:pointer;transition:all 0.15s;">${w}</button>`;
+              }).join('')}
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--grey-100);padding-top:18px;margin-bottom:20px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--charcoal);margin-bottom:12px;">Colour palette</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+              ${palettes.map(p => {
+                const sel = selPalette === p.key;
+                return `
+                <div onclick="selectBrandPalette('${p.key}')" id="wz-bp-${p.key}"
+                     style="padding:12px;border:2px solid ${sel?'var(--violet)':'var(--grey-200)'};background:${sel?'#F5F3FF':'#fff'};border-radius:10px;cursor:pointer;transition:all 0.2s;">
+                  <div style="display:flex;gap:5px;margin-bottom:8px;">
+                    ${p.swatches.map(c => `<div style="width:20px;height:20px;border-radius:4px;background:${c};"></div>`).join('')}
+                  </div>
+                  <div style="font-weight:700;font-size:12px;">${p.label}</div>
+                  <div style="font-size:11px;color:var(--grey-500);margin-top:2px;">${p.desc}</div>
+                </div>`;
+              }).join('')}
+            </div>
+
+            <!-- Create your own palette -->
+            <div id="wz-bp-custom"
+                 style="padding:14px;border:2px solid ${selPalette==='custom'?'var(--violet)':'var(--grey-200)'};background:${selPalette==='custom'?'#F5F3FF':'#fafafa'};border-radius:10px;transition:all 0.2s;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div>
+                  <div style="font-weight:700;font-size:12px;">Create your own</div>
+                  <div style="font-size:11px;color:var(--grey-500);margin-top:2px;">Enter your own hex codes</div>
+                </div>
+                <div id="wz-custom-preview" style="display:flex;gap:5px;">
+                  ${['wz-custom-c1','wz-custom-c2','wz-custom-c3','wz-custom-c4'].map((id,i) => {
+                    const saved = wzData.brand_custom_swatches || [];
+                    const c = saved[i] || ['#000000','#555555','#AAAAAA','#FFFFFF'][i];
+                    return `<div id="${id}-preview" style="width:20px;height:20px;border-radius:4px;background:${c};border:1px solid var(--grey-200);"></div>`;
+                  }).join('')}
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                ${[
+                  { id:'wz-custom-c1', label:'Primary',   idx:0 },
+                  { id:'wz-custom-c2', label:'Accent',    idx:1 },
+                  { id:'wz-custom-c3', label:'Light',     idx:2 },
+                  { id:'wz-custom-c4', label:'Highlight', idx:3 }
+                ].map(c => {
+                  const saved = wzData.brand_custom_swatches || [];
+                  const val = saved[c.idx] || ['#000000','#555555','#AAAAAA','#FFFFFF'][c.idx];
+                  return `
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <input type="color" id="${c.id}" value="${val}"
+                           oninput="updateCustomSwatch('${c.id}',${c.idx})"
+                           style="width:32px;height:32px;border:none;background:none;cursor:pointer;padding:0;border-radius:6px;">
+                    <div>
+                      <div style="font-size:11px;font-weight:600;color:var(--charcoal);">${c.label}</div>
+                      <input type="text" id="${c.id}-hex" value="${val}" maxlength="7"
+                             oninput="updateCustomSwatchFromHex('${c.id}',${c.idx})"
+                             style="font-size:10px;color:var(--grey-500);border:none;background:none;width:60px;padding:0;font-family:monospace;">
+                    </div>
+                  </div>`;
+                }).join('')}
+              </div>
+              <button type="button" onclick="applyCustomPalette()"
+                      style="margin-top:10px;width:100%;padding:7px;border:1.5px solid var(--violet);border-radius:8px;background:none;color:var(--violet);font-size:12px;font-weight:700;cursor:pointer;">
+                Use this palette
+              </button>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--grey-100);padding-top:18px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--charcoal);margin-bottom:12px;">Typography</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              ${fonts.map(f => {
+                const sel = selFont === f.key;
+                return `
+                <div onclick="selectBrandFont('${f.key}')" id="wz-bf-${f.key}"
+                     style="padding:14px;border:2px solid ${sel?'var(--violet)':'var(--grey-200)'};background:${sel?'#F5F3FF':'#fff'};border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s;">
+                  <div>
+                    <span style="font-size:14px;font-weight:700;color:var(--charcoal);">${f.heading}</span>
+                    <span style="font-size:12px;color:var(--grey-400);margin-left:8px;">+ ${f.body}</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--grey-400);">${f.desc}</span>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // ── STEP 11 · YOUR WEBSITE ─────────────────────────────────────
     case 11: return `
-      <div style="background:#F5F3FF;border:1px solid #C4B5FD;border-radius:10px;padding:14px;margin-bottom:18px;font-size:12px;color:#AB86FA;">
-        💡 All of these are optional. You can add them any time in <strong>Settings → Integrations</strong>.
+      <div style="background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border-radius:12px;padding:18px;margin-bottom:18px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:10px;">🌐</div>
+        <div style="font-weight:700;font-size:15px;color:var(--charcoal);margin-bottom:6px;">Your website is being built from your answers</div>
+        <div style="font-size:13px;color:var(--grey-600);line-height:1.6;max-width:360px;margin:0 auto;">
+          Your story, philosophy, niche, and services have all been captured. When you complete setup, PlenusOS will generate your first homepage draft — nothing generic, nothing template-y.
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">
+        ${[
+          { label:'Homepage hero', status: wzData.story_q1 ? 'Ready' : 'Needs story (Step 4)', ready: !!wzData.story_q1 },
+          { label:'About section', status: wzData.about_draft ? 'Generated' : wzData.story_q4 ? 'Ready to generate' : 'Needs story (Step 4)', ready: !!wzData.about_draft },
+          { label:'Philosophy statement', status: wzData.philosophy_statement ? 'Generated' : wzData.philosophy_q5 ? 'Ready to generate' : 'Needs philosophy (Step 6)', ready: !!wzData.philosophy_statement },
+          { label:'Services section', status: wzData.services && wzData.services.length ? `${wzData.services.length} service${wzData.services.length>1?'s':''} ready` : 'Needs services (Step 9)', ready: !!(wzData.services && wzData.services.length) },
+          { label:'Brand & colours', status: wzData.brand_palette ? 'Palette chosen' : 'Needs brand (Step 10)', ready: !!wzData.brand_palette }
+        ].map(item => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid ${item.ready?'#D1FAE5':'var(--grey-200)'};background:${item.ready?'#F0FDF4':'#fff'};border-radius:8px;">
+            <span style="font-size:13px;font-weight:600;color:var(--charcoal);">${item.label}</span>
+            <span style="font-size:12px;color:${item.ready?'#059669':'var(--grey-400)'};">${item.ready ? '✓ ' : ''}${item.status}</span>
+          </div>`).join('')}
       </div>
       <div class="form-group">
-        <label>Claude API Key <span style="color:var(--grey-400);font-weight:400;">(unlocks all AI features)</span></label>
-        <input type="text" id="wz-claude-key" class="wz-input" placeholder="sk-ant-api03-…" autocomplete="off">
-        <div style="font-size:11px;color:var(--grey-500);margin-top:4px;">Get your key at <strong>console.anthropic.com</strong></div>
-      </div>
-      <div class="form-group">
-        <label>Stripe Publishable Key <span style="color:var(--green);font-weight:400;">✓ publishable only</span></label>
-        <input type="text" id="wz-stripe-key" class="wz-input" placeholder="pk_live_… or pk_test_…" autocomplete="off">
-        <div style="font-size:11px;color:var(--red);margin-top:4px;">⚠️ Never enter your Stripe <em>secret</em> key anywhere — only the publishable key goes here</div>
-      </div>
-      <div class="form-group">
-        <label>PayPal Client ID</label>
-        <input type="text" id="wz-paypal-id" class="wz-input" placeholder="AY…" autocomplete="off">
+        <label style="font-size:12px;">Preferred layout style</label>
+        <select id="wz-layout-style" class="wz-input">
+          ${['Clean & Minimal','Warm & Story-led','Bold & Modern','Elegant & Premium','Calm & Clinical','Nature-inspired'].map(l => `<option ${wzData.website_layout===l?'selected':''}>${l}</option>`).join('')}
+        </select>
       </div>`;
+
+    // ── STEP 12 · YOUR AVAILABILITY ────────────────────────────────
+    case 12: {
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      const saved = wzData.availability_days || {};
+      return `
+        <p style="font-size:13px;color:var(--grey-500);margin-bottom:16px;">Set your working hours — you can update these any time in Settings.</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${days.map(day => {
+            const d = saved[day] || {};
+            return `
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--grey-200);border-radius:10px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:8px;min-width:120px;font-weight:600;font-size:13px;cursor:pointer;">
+                <input type="checkbox" class="wz-avail-toggle" data-day="${day}" ${d.enabled?'checked':''} style="width:16px;height:16px;accent-color:var(--violet);" onchange="toggleAvailDay(this,'${day}')">
+                ${day}
+              </label>
+              <div id="wz-avail-times-${day}" style="display:${d.enabled?'flex':'none'};align-items:center;gap:8px;flex-wrap:wrap;">
+                <input type="time" class="wz-avail-start wz-input" data-day="${day}" value="${d.start||'09:00'}" style="width:110px;padding:6px 10px;">
+                <span style="color:var(--grey-400);font-size:13px;">to</span>
+                <input type="time" class="wz-avail-end wz-input" data-day="${day}" value="${d.end||'17:00'}" style="width:110px;padding:6px 10px;">
+              </div>
+              ${!d.enabled ? '<span style="font-size:12px;color:var(--grey-300);">Day off</span>' : ''}
+            </div>`;
+          }).join('')}
+        </div>`;
+    }
 
     default: return '<p>Unknown step</p>';
   }
 }
 
 function prefillWizardStep(step) {
-  const fills = {
-    2:  { 'wz-practice-name': PROFILE.practice_name, 'wz-location': PROFILE.location, 'wz-business-email': PROFILE.business_email || currentUser?.email, 'wz-website': PROFILE.website },
-    3:  { 'wz-name': PROFILE.name, 'wz-qualifications': PROFILE.qualifications, 'wz-years': PROFILE.years_in_practice, 'wz-phone': PROFILE.phone },
-    6:  { 'wz-ideal-client': PROFILE.ideal_client, 'wz-age-range': PROFILE.age_range },
-    7:  { 'wz-struggles': PROFILE.struggles },
-    9:  { 'wz-tone': PROFILE.tone },
-    11: { 'wz-claude-key': '', 'wz-stripe-key': '', 'wz-paypal-id': PROFILE.paypal_client_id }
-  };
-  const stepFills = fills[step];
-  if (stepFills) {
-    Object.entries(stepFills).forEach(([id, val]) => {
-      const el = document.getElementById(id);
-      if (el && val) el.value = val;
-    });
-  }
-  if (step === 4 && PROFILE.memberships) {
-    try {
-      const mb = typeof PROFILE.memberships === 'string' ? JSON.parse(PROFILE.memberships) : PROFILE.memberships;
-      Object.entries(mb).forEach(([key, val]) => {
-        const el = document.getElementById('wz-mb-' + key);
-        if (el) el.checked = val;
-      });
-    } catch(e) {}
-  }
-  if (step === 9 && PROFILE.palette) {
-    selectPalette(PROFILE.palette);
-  }
+  // Data is already embedded in HTML via wzData — no additional prefill needed for rebuilt steps.
+  // Retained for backwards compatibility with any external calls.
 }
 
 function selectPalette(key) {
@@ -3763,53 +4121,310 @@ function selectPalette(key) {
 function collectWizardStep(step) {
   const g = (id) => document.getElementById(id)?.value || '';
   switch(step) {
-    case 1: break;
+    case 1:
+      wzData.assistant_gender = wzData.assistant_gender || 'female';
+      wzData.assistant_name   = g('wz-assistant-name') || wzData.assistant_name || '';
+      break;
     case 2:
-      const wzWorkType = document.querySelector('input[name="wz-work-type"]:checked')?.value || 'online';
-      const wzLocationText = g('wz-location');
-      const wzLocationVal = wzWorkType === 'online' ? 'Online' : wzWorkType === 'hybrid' ? ('Hybrid' + (wzLocationText ? ' · ' + wzLocationText : '')) : wzLocationText;
-      Object.assign(wzData, { practice_name: g('wz-practice-name'), location: wzLocationVal, business_email: g('wz-business-email'), website: g('wz-website') });
+      wzData.practice_types       = Array.from(document.querySelectorAll('.wz-type-chip.selected')).map(el => el.textContent.trim());
+      wzData.practice_type_other  = g('wz-practice-type-other');
       break;
     case 3:
-      Object.assign(wzData, { name: g('wz-name'), qualifications: g('wz-qualifications'), years_in_practice: g('wz-years'), phone: g('wz-phone') });
+      wzData.work_location_type = wzData.work_location_type || 'online';
+      wzData.work_location_city = g('wz-location-city');
       break;
     case 4:
-      wzData.memberships = { bant: !!document.getElementById('wz-mb-bant')?.checked, cnhc: !!document.getElementById('wz-mb-cnhc')?.checked, ifm: !!document.getElementById('wz-mb-ifm')?.checked, ico: !!document.getElementById('wz-mb-ico')?.checked };
+      wzData.story_q1   = g('wz-story-current') || wzData.story_q1;
+      wzData.about_draft= g('wz-about-text')    || wzData.about_draft;
       break;
-    case 5:
-      wzData.niches = Array.from(document.querySelectorAll('.wz-niche:checked')).map(el => el.dataset.niche);
-      break;
-    case 6:
-      Object.assign(wzData, { ideal_client: g('wz-ideal-client'), age_range: g('wz-age-range') || '35–45' });
-      break;
-    case 7:
-      wzData.struggles = g('wz-struggles');
-      break;
-    case 8:
-      wzData.services = [1,2,3].map(i => ({ name: g(`wz-svc${i}-name`), price: g(`wz-svc${i}-price`), duration: g(`wz-svc${i}-duration`) })).filter(s => s.name);
-      break;
-    case 9: {
-      wzData.tone = g('wz-tone') || 'warm';
-      if (!wzData.palette) wzData.palette = 'charcoal-violet';
-      const paletteDefs = {
-        'charcoal-violet': { primary:'#0B1538', accent:'#2C00CB', light:'#F9FAFB' },
-        'forest-gold':     { primary:'#1B4332', accent:'#D97706', light:'#F0FDF4' },
-        'ocean-coral':     { primary:'#0F4C75', accent:'#FF6B6B', light:'#EFF6FF' },
-        'rose-stone':      { primary:'#831843', accent:'#6B7280', light:'#FFF1F2' }
-      };
-      wzData.palette_colors = paletteDefs[wzData.palette] || paletteDefs['charcoal-violet'];
+    case 5: {
+      const accreds = ['bant','cnhc','icf','ukcp','bacp','anp','ntc','reps','yoga','ifm','ico','cma'];
+      const saved = {};
+      accreds.forEach(k => {
+        saved[k]               = !!document.getElementById('wz-acc-' + k)?.checked;
+        saved[k + '_inprogress']= !!document.getElementById('wz-acc-' + k + '-ip')?.checked;
+      });
+      wzData.accreditations      = saved;
+      wzData.accreditations_other= g('wz-acc-other');
       break;
     }
+    case 6:
+      wzData.philosophy_statement = g('wz-philosophy-text') || wzData.philosophy_statement;
+      break;
+    case 7: {
+      wzData.client_archetypes = Array.from(document.querySelectorAll('.wz-archetype:checked')).map(el => el.dataset.archetype);
+      const avatars = wzData.client_avatars || [{}];
+      avatars[0] = {
+        ...avatars[0],
+        name:         g('wz-av-name'),
+        age_range:    g('wz-av-age'),
+        primary_goal: g('wz-av-goal'),
+        primary_pain: g('wz-av-pain'),
+        main_objection: g('wz-av-objection')
+      };
+      wzData.client_avatars = avatars;
+      break;
+    }
+    case 8:
+      wzData.niche_statement  = g('wz-niche-text')    || wzData.niche_statement;
+      wzData.niche_provisional= !!document.getElementById('wz-niche-unsure')?.checked;
+      break;
+    case 9:
+      wzData.services = Array.from(document.querySelectorAll('.wz-service-card')).map(card => ({
+        name:        card.querySelector('.wz-svc-name')?.value     || '',
+        duration:    card.querySelector('.wz-svc-duration')?.value || '',
+        description: card.querySelector('.wz-svc-desc')?.value     || '',
+        delivery:    card.querySelector('.wz-svc-delivery')?.value || 'Online'
+      })).filter(s => s.name);
+      break;
     case 10:
-      wzData.goals = Array.from(document.querySelectorAll('.wz-goal:checked')).map(el => el.dataset.goal);
+      // brand_feel, brand_ethics, brand_palette, brand_fonts tracked live via toggle functions
       break;
     case 11:
-      const ck = g('wz-claude-key'), sk = g('wz-stripe-key'), pk = g('wz-paypal-id');
-      if (ck) wzData.claude_api_key         = ck;
-      if (sk) wzData.stripe_publishable_key = sk;
-      if (pk) wzData.paypal_client_id       = pk;
+      wzData.website_layout = g('wz-layout-style');
       break;
+    case 12: {
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      const avail = {};
+      days.forEach(day => {
+        const toggle = document.querySelector(`.wz-avail-toggle[data-day="${day}"]`);
+        const start  = document.querySelector(`.wz-avail-start[data-day="${day}"]`);
+        const end    = document.querySelector(`.wz-avail-end[data-day="${day}"]`);
+        avail[day] = {
+          enabled: toggle?.checked || false,
+          start:   start?.value || '09:00',
+          end:     end?.value   || '17:00'
+        };
+      });
+      wzData.availability_days = avail;
+      break;
+    }
   }
+}
+
+// ── WIZARD HELPER FUNCTIONS ────────────────────────────────────────────────
+
+function selectAssistantGender(gender) {
+  wzData.assistant_gender = gender;
+  ['female','male'].forEach(g => {
+    const el = document.getElementById('wz-gender-' + g);
+    if (!el) return;
+    el.style.border    = g === gender ? '2px solid var(--violet)' : '2px solid var(--grey-200)';
+    el.style.background= g === gender ? '#F5F3FF' : '#fff';
+  });
+}
+
+function previewAssistantIntro() {
+  const name = document.getElementById('wz-assistant-name')?.value || '';
+  const preview = document.getElementById('wz-assistant-preview');
+  if (!preview) return;
+  if (name.trim()) {
+    preview.style.display = 'block';
+    preview.textContent = `"Hello — I'm ${name}. I'm here to help you build and grow your practice. Let's get started."`;
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+function togglePracticeType(btn, type) {
+  if (!wzData.practice_types) wzData.practice_types = [];
+  const idx = wzData.practice_types.indexOf(type);
+  if (idx > -1) {
+    wzData.practice_types.splice(idx, 1);
+    btn.classList.remove('selected');
+    btn.style.border     = '1.5px solid var(--grey-200)';
+    btn.style.background = '#fff';
+    btn.style.color      = 'var(--grey-600)';
+    btn.style.fontWeight = '500';
+  } else {
+    wzData.practice_types.push(type);
+    btn.classList.add('selected');
+    btn.style.border     = '1.5px solid var(--violet)';
+    btn.style.background = '#F5F3FF';
+    btn.style.color      = 'var(--violet)';
+    btn.style.fontWeight = '700';
+  }
+}
+
+function selectWorkLocation(type) {
+  wzData.work_location_type = type;
+  ['in_person','online','hybrid'].forEach(t => {
+    const el = document.getElementById('wz-loc-' + t);
+    if (!el) return;
+    const active = t === type;
+    el.style.border     = active ? '2px solid var(--violet)' : '2px solid var(--grey-200)';
+    el.style.background = active ? '#F5F3FF' : '#fff';
+  });
+  const cityWrap = document.getElementById('wz-city-wrap');
+  if (cityWrap) cityWrap.style.display = type === 'online' ? 'none' : 'block';
+}
+
+function saveStoryAndNext(q) {
+  const val = document.getElementById('wz-story-current')?.value || '';
+  wzData['story_q' + q] = val;
+  wzData.story_q = q + 1;
+  renderWizardStep();
+}
+
+function goStoryQ(n) {
+  const val = document.getElementById('wz-story-current')?.value || '';
+  if (wzData.story_q) wzData['story_q' + wzData.story_q] = val;
+  wzData.story_q = n;
+  renderWizardStep();
+}
+
+function generateAboutDraft() {
+  const q1 = wzData.story_q1 || '', q2 = wzData.story_q2 || '', q3 = wzData.story_q3 || '', q4 = wzData.story_q4 || '';
+  const name = wzData.assistant_name || 'your practice';
+  const draft = `${q1}\n\n${q2}\n\n${q3 ? 'Clients often say: ' + q3 : ''}\n\n${q4 ? 'One thing I want you to know: ' + q4 : ''}`.trim();
+  wzData.about_draft = draft;
+  const draftEl = document.getElementById('wz-about-draft');
+  const textEl  = document.getElementById('wz-about-text');
+  if (draftEl) draftEl.style.display = 'block';
+  if (textEl)  textEl.value = draft;
+}
+
+function savePhilosophyAndNext(q) {
+  const val = document.getElementById('wz-philosophy-current')?.value || '';
+  wzData['philosophy_q' + q] = val;
+  wzData.philosophy_q = q + 1;
+  renderWizardStep();
+}
+
+function goPhilosophyQ(n) {
+  const val = document.getElementById('wz-philosophy-current')?.value || '';
+  if (wzData.philosophy_q) wzData['philosophy_q' + wzData.philosophy_q] = val;
+  wzData.philosophy_q = n;
+  renderWizardStep();
+}
+
+function generatePhilosophyDraft() {
+  const q1 = wzData.philosophy_q1 || '', q2 = wzData.philosophy_q2 || '',
+        q3 = wzData.philosophy_q3 || '', q4 = wzData.philosophy_q4 || '',
+        q5 = wzData.philosophy_q5 || '';
+  const draft = `I believe ${q1.toLowerCase().replace(/^i believe /,'')}.\n\n${q2}\n\n${q3 ? 'Working with me feels like ' + q3.toLowerCase() + '.' : ''}\n\n${q5 ? 'What I will never compromise on: ' + q5 : ''}`.trim();
+  wzData.philosophy_statement = draft;
+  const draftEl = document.getElementById('wz-philosophy-draft');
+  const textEl  = document.getElementById('wz-philosophy-text');
+  if (draftEl) draftEl.style.display = 'block';
+  if (textEl)  textEl.value = draft;
+}
+
+function saveNicheAndNext(q) {
+  const val = document.getElementById('wz-niche-current')?.value || '';
+  wzData['niche_q' + q] = val;
+  wzData.niche_q = q + 1;
+  renderWizardStep();
+}
+
+function goNicheQ(n) {
+  const val = document.getElementById('wz-niche-current')?.value || '';
+  if (wzData.niche_q) wzData['niche_q' + wzData.niche_q] = val;
+  wzData.niche_q = n;
+  renderWizardStep();
+}
+
+function generateNicheDraft() {
+  const q1 = wzData.niche_q1 || '', q2 = wzData.niche_q2 || '',
+        q3 = wzData.niche_q3 || '', q4 = wzData.niche_q4 || '';
+  const draft = `I help ${q1} who ${q2.toLowerCase()}. Together we work toward ${q3.toLowerCase()}. ${q4 ? 'What makes my approach different: ' + q4 : ''}`.trim();
+  wzData.niche_statement = draft;
+  const draftEl = document.getElementById('wz-niche-draft');
+  const textEl  = document.getElementById('wz-niche-text');
+  if (draftEl) draftEl.style.display = 'block';
+  if (textEl)  textEl.value = draft;
+}
+
+function addWizardService() {
+  if (!wzData.services) wzData.services = [];
+  wzData.services.push({ name:'', duration:'', description:'', delivery:'Online' });
+  renderWizardStep();
+}
+
+function toggleBrandFeel(btn, word) {
+  if (!wzData.brand_feel) wzData.brand_feel = [];
+  const idx = wzData.brand_feel.indexOf(word);
+  if (idx > -1) {
+    wzData.brand_feel.splice(idx, 1);
+    btn.style.border = '1.5px solid var(--grey-200)'; btn.style.background = '#fff';
+    btn.style.color = 'var(--grey-600)'; btn.style.fontWeight = '500';
+  } else {
+    wzData.brand_feel.push(word);
+    btn.style.border = '1.5px solid var(--violet)'; btn.style.background = '#F5F3FF';
+    btn.style.color = 'var(--violet)'; btn.style.fontWeight = '700';
+  }
+}
+
+function toggleBrandEthics(btn, word) {
+  if (!wzData.brand_ethics) wzData.brand_ethics = [];
+  const idx = wzData.brand_ethics.indexOf(word);
+  if (idx > -1) {
+    wzData.brand_ethics.splice(idx, 1);
+    btn.style.border = '1.5px solid var(--grey-200)'; btn.style.background = '#fff';
+    btn.style.color = 'var(--grey-600)'; btn.style.fontWeight = '500';
+  } else {
+    wzData.brand_ethics.push(word);
+    btn.style.border = '1.5px solid #059669'; btn.style.background = '#ECFDF5';
+    btn.style.color = '#059669'; btn.style.fontWeight = '700';
+  }
+}
+
+function selectBrandPalette(key) {
+  wzData.brand_palette = key;
+  document.querySelectorAll('[id^="wz-bp-"]').forEach(el => {
+    const active = el.id === 'wz-bp-' + key;
+    el.style.border = active ? '2px solid var(--violet)' : '2px solid var(--grey-200)';
+    el.style.background = active ? '#F5F3FF' : '#fff';
+  });
+}
+
+function updateCustomSwatch(inputId, idx) {
+  const colorInput = document.getElementById(inputId);
+  if (!colorInput) return;
+  const hex = colorInput.value;
+  const hexInput = document.getElementById(inputId + '-hex');
+  if (hexInput) hexInput.value = hex;
+  const preview = document.getElementById(inputId + '-preview');
+  if (preview) preview.style.background = hex;
+  if (!wzData.brand_custom_swatches) wzData.brand_custom_swatches = ['#000000','#555555','#AAAAAA','#FFFFFF'];
+  wzData.brand_custom_swatches[idx] = hex;
+}
+
+function updateCustomSwatchFromHex(inputId, idx) {
+  const hexInput = document.getElementById(inputId + '-hex');
+  if (!hexInput) return;
+  let hex = hexInput.value.trim();
+  if (!hex.startsWith('#')) hex = '#' + hex;
+  if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
+  const colorInput = document.getElementById(inputId);
+  if (colorInput) colorInput.value = hex;
+  const preview = document.getElementById(inputId + '-preview');
+  if (preview) preview.style.background = hex;
+  if (!wzData.brand_custom_swatches) wzData.brand_custom_swatches = ['#000000','#555555','#AAAAAA','#FFFFFF'];
+  wzData.brand_custom_swatches[idx] = hex;
+}
+
+function applyCustomPalette() {
+  wzData.brand_palette = 'custom';
+  document.querySelectorAll('[id^="wz-bp-"]').forEach(el => {
+    const active = el.id === 'wz-bp-custom';
+    el.style.border = active ? '2px solid var(--violet)' : '2px solid var(--grey-200)';
+    el.style.background = active ? '#F5F3FF' : el.id === 'wz-bp-custom' ? '#fafafa' : '#fff';
+  });
+}
+
+function selectBrandFont(key) {
+  wzData.brand_fonts = key;
+  document.querySelectorAll('[id^="wz-bf-"]').forEach(el => {
+    const active = el.id === 'wz-bf-' + key;
+    el.style.border = active ? '2px solid var(--violet)' : '2px solid var(--grey-200)';
+    el.style.background = active ? '#F5F3FF' : '#fff';
+  });
+}
+
+function toggleAvailDay(checkbox, day) {
+  const timesEl = document.getElementById('wz-avail-times-' + day);
+  if (timesEl) timesEl.style.display = checkbox.checked ? 'flex' : 'none';
 }
 
 async function wizardNext() {
