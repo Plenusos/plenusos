@@ -2669,7 +2669,9 @@ async function saveIntegrations() {
   if (stripeVal && !stripeVal.startsWith('•')) updates.stripe_publishable_key = stripeVal;
   if (paypalVal && !paypalVal.startsWith('•')) updates.paypal_client_id       = paypalVal;
 
-  const { error } = await sb.from('practitioner_profiles').update(updates).eq('id', currentUser.uid);
+  updates.id = currentUser.uid;
+  updates.email = updates.email || currentUser.email;
+  const { error } = await sb.from('practitioner_profiles').upsert(updates, { onConflict: 'id' });
 
   if (error) {
     showToast('❌ Error saving: ' + error.message);
