@@ -163,9 +163,9 @@ textarea{resize:vertical;min-height:90px;}
 .nf-overlay-card.wide{max-width:640px;}
 #overlay-wizard{overflow-y:hidden;}
 #overlay-wizard .nf-overlay-card{height:94vh;max-height:94vh;display:flex;flex-direction:column;padding:12px 20px;overflow:hidden;}
-#overlay-wizard .nf-logo img{max-height:52px;width:auto;}
+#overlay-wizard .nf-logo img{max-height:70px;max-width:200px;width:auto;height:auto;object-fit:contain;}
 #overlay-wizard .nf-logo{margin-bottom:6px;}
-#wz-body{flex:1;overflow-y:scroll;overflow-x:hidden;min-height:0;height:0;padding-right:4px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;}
+#wz-body{flex:1;overflow-y:scroll;overflow-x:hidden;min-height:0;height:0;padding:4px 4px 16px 0;-webkit-overflow-scrolling:touch;}
 .nf-logo{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .nf-logo-mark{width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
 .nf-logo-text{font-size:20px;font-weight:700;}
@@ -283,7 +283,7 @@ textarea{resize:vertical;min-height:90px;}
     <div id="wz-dots-wrap"><div class="wz-step-dots" id="wz-dots"></div></div>
     <h2 class="nf-overlay-title" id="wz-step-title">Welcome to PlenusOS! 🌿</h2>
     <p class="nf-overlay-sub" id="wz-step-subtitle">Let's set up your practice in a few minutes</p>
-    <div id="wz-body" style="min-height:160px;"></div>
+    <div id="wz-body"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--grey-100);flex-shrink:0;">
       <button class="btn btn-secondary" id="wz-back" onclick="wizardBack()" style="display:none;">← Back</button>
       <div style="flex:1;"></div>
