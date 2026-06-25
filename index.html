@@ -2510,7 +2510,7 @@ async function loadProfile() {
       'website_layout','online_presence_type','social_instagram','social_facebook',
       'social_linkedin','social_tiktok','social_youtube','social_other',
       'availability_days','practice_name','name',
-      'ic_age_range','ic_gender','ic_life_stage','ic_income','ic_struggle','ic_tried',
+      'ic_age_range','ic_age_range_custom','ic_gender','ic_gender_custom','ic_life_stage','ic_income','ic_struggle','ic_tried',
       'ic_trigger','ic_goal','ic_blocker','ic_channels'];
     fields.forEach(f => { if (data[f] !== undefined && data[f] !== null) wzData[f] = data[f]; });
     showScreen('wizard');
@@ -4501,7 +4501,7 @@ async function saveWizardProgress() {
       'website_layout','online_presence_type','social_instagram','social_facebook',
       'social_linkedin','social_tiktok','social_youtube','social_other',
       'availability_days','practice_name','name',
-      'ic_age_range','ic_gender','ic_life_stage','ic_income','ic_struggle','ic_tried',
+      'ic_age_range','ic_age_range_custom','ic_gender','ic_gender_custom','ic_life_stage','ic_income','ic_struggle','ic_tried',
       'ic_trigger','ic_goal','ic_blocker','ic_channels'];
     wdFields.forEach(f => { if (wzData[f] !== undefined && wzData[f] !== null) payload[f] = wzData[f]; });
     const { error } = await sb.from('practitioner_profiles').upsert(payload, { onConflict: 'id' });
@@ -4846,9 +4846,21 @@ function getWizardStepHTML(step) {
           </div>
           <textarea id="wz-journey-intention" class="wz-input" style="min-height:120px;" oninput="debounceAutosave()" placeholder="Dream a little. What would you tell yourself a year from now, looking back?">${wzData.journey_intention || ''}</textarea>
           ${getInspirationHTML('journey_intention')}
+
+          <div style="border-top:1px solid var(--grey-100);margin-top:16px;padding-top:16px;">
+            <div style="background:#F5F3FF;border-left:3px solid var(--violet);padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--violet);margin-bottom:4px;">${assistantName} asks</div>
+              <div style="font-size:15px;font-weight:600;color:var(--charcoal);line-height:1.5;">A little about you as a person — beyond your qualifications</div>
+              <div style="font-size:12px;color:var(--grey-500);margin-top:4px;line-height:1.5;">Your personal background shapes the way you work and who you connect with most. This is used to personalise your website copy and AI suggestions — and it helps clients see the real person behind the business.</div>
+            </div>
+            <textarea id="wz-personal-bio" class="wz-input" style="min-height:100px;" oninput="debounceAutosave()"
+              placeholder="e.g. I'm a disabled stroke survivor, single mother of two, and a former competition rider. I came to nutrition through my own recovery journey and a deep belief that real food changes everything.">${wzData.personal_bio || ''}</textarea>
+            <div style="font-size:11px;color:var(--grey-400);margin-top:6px;line-height:1.5;">Write it the way you'd introduce yourself to a new client — warm, honest, in your own words. No need for formal language.</div>
+          </div>
+
           <div style="display:flex;justify-content:space-between;margin-top:12px;">
             <button class="btn btn-secondary" onclick="wzData.journey_phase=3;renderWizardStep();" style="padding:8px 14px;font-size:12px;">← Back</button>
-            <button class="btn btn-primary" onclick="wzData.journey_intention=document.getElementById('wz-journey-intention').value;wizardNext();" style="padding:8px 14px;font-size:12px;">Continue →</button>
+            <button class="btn btn-primary" onclick="wzData.journey_intention=document.getElementById('wz-journey-intention').value;wzData.personal_bio=document.getElementById('wz-personal-bio').value;wizardNext();" style="padding:8px 14px;font-size:12px;">Continue →</button>
           </div>
         </div>`;
     }
@@ -5126,16 +5138,18 @@ function getWizardStepHTML(step) {
             <input type="text" id="wz-ic-name" class="wz-input" placeholder="e.g. Sarah, James, Maria…" value="${wzData.ic_name||''}" oninput="wzData.ic_name=this.value;debounceAutosave();">
           </div>
           <div class="form-group" style="margin-bottom:10px;">
-            <label>Age range</label>
+            <label>Age range <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(pick all that apply)</span></label>
             <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
               ${icChips('ic_age_range',['Under 25','25–35','35–45','45–55','55–65','65+','Mixed ages'])}
             </div>
+            <input type="text" class="wz-input" style="margin-top:8px;font-size:12px;" placeholder="Or describe in your own words… e.g. mostly women in their 40s" value="${wzData.ic_age_range_custom||''}" oninput="wzData.ic_age_range_custom=this.value;debounceAutosave();">
           </div>
           <div class="form-group" style="margin-bottom:10px;">
             <label>Gender</label>
             <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
               ${icChips('ic_gender',['All genders','Mostly women','Mostly men','Non-binary / gender-diverse'])}
             </div>
+            <input type="text" class="wz-input" style="margin-top:8px;font-size:12px;" placeholder="Or describe in your own words… e.g. people of any gender dealing with chronic fatigue" value="${wzData.ic_gender_custom||''}" oninput="wzData.ic_gender_custom=this.value;debounceAutosave();">
           </div>
           <div class="form-group" style="margin-bottom:10px;">
             <label>Life stage <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(pick all that apply)</span></label>
@@ -5212,7 +5226,7 @@ function getWizardStepHTML(step) {
               <div style="width:44px;height:44px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;">👤</div>
               <div>
                 <div style="font-weight:800;font-size:15px;color:var(--charcoal);">${wzData.ic_name || 'Your ideal client'}</div>
-                <div style="font-size:12px;color:var(--grey-500);">${[wzData.ic_age_range,wzData.ic_gender].filter(x=>x&&!Array.isArray(x)).join(' · ') || (wzData.ic_age_range&&wzData.ic_age_range[0]) || 'Age & gender not yet set'}</div>
+                <div style="font-size:12px;color:var(--grey-500);">${(()=>{const a=(wzData.ic_age_range&&wzData.ic_age_range.length)?wzData.ic_age_range.join(', '):(wzData.ic_age_range_custom||'');const g=(wzData.ic_gender&&wzData.ic_gender.length)?wzData.ic_gender[0]:(wzData.ic_gender_custom||'');return [a,g].filter(Boolean).join(' · ')||'Age & gender not yet set';})()}</div>
               </div>
             </div>
             ${wzData.ic_struggle ? `<div style="font-size:12px;color:var(--grey-600);margin-bottom:6px;"><strong style="color:var(--charcoal);">Struggling with:</strong> ${wzData.ic_struggle}</div>` : ''}
@@ -5880,9 +5894,9 @@ function getInspirationHTML(questionId) {
   const id = 'insp-' + questionId;
   return `
     <div style="margin-top:8px;">
-      <button type="button" onclick="document.getElementById('${id}').style.display=document.getElementById('${id}').style.display==='none'?'block':'none';var el=document.getElementById('${id}');el.style.display=el.style.display==='none'?'flex':'none';this.textContent=el.style.display==='none'?'💡 Need a starter? ▸':'💡 Need a starter? ▾';"
+      <button type="button" onclick="(function(btn){var el=document.getElementById('${id}');var showing=el.style.display!=='none';el.style.display=showing?'none':'flex';btn.textContent=showing?'💡 Need a starter? ▸':'💡 Need a starter? ▾';})(this)"
         style="background:none;border:none;padding:0;font-size:12px;color:var(--violet);cursor:pointer;font-weight:600;">
-        💡 Need a starter? ▾
+        💡 Need a starter? ▸
       </button>
       <div id="${id}" style="display:none;flex-wrap:wrap;gap:7px;margin-top:8px;">
         ${starters.map(s => `<button type="button" onclick="(function(){var t=document.getElementById('${textareaId}');if(t){t.value=t.value?t.value+' ':'';t.value+='${s.replace(/'/g,"\\'")}';t.focus();}})()" style="padding:6px 12px;background:#fff;border:1.5px solid var(--grey-200);border-radius:20px;font-size:11px;color:var(--grey-600);cursor:pointer;text-align:left;transition:all 0.15s;max-width:280px;white-space:normal;line-height:1.3;" onmouseover="this.style.borderColor='var(--violet)';this.style.color='var(--violet)';" onmouseout="this.style.borderColor='var(--grey-200)';this.style.color='var(--grey-600)';">${s}</button>`).join('')}
@@ -6595,6 +6609,7 @@ function collectWizardStep(step) {
     case 4: {
       wzData.journey_why       = g('wz-journey-why')       || wzData.journey_why;
       wzData.journey_intention = g('wz-journey-intention') || wzData.journey_intention;
+      wzData.personal_bio      = g('wz-personal-bio')      || wzData.personal_bio;
       // Challenges are saved immediately when "Next" is clicked from phase 3
       break;
     }
@@ -6847,7 +6862,7 @@ function saveIdealClientQAndNext(q) {
 function icToggle(field, value, btn) {
   if (!wzData[field] || !Array.isArray(wzData[field])) wzData[field] = [];
   const arr = wzData[field];
-  const singleFields = ['ic_age_range','ic_gender','ic_income']; // single-select
+  const singleFields = ['ic_gender','ic_income']; // single-select (age range is multi-select)
   if (singleFields.includes(field)) {
     wzData[field] = arr.includes(value) ? [] : [value];
   } else {
@@ -7252,8 +7267,8 @@ function validateWizardStep(step) {
       break;
     }
     case 9:
-      if (!wzData['ideal_client_q1'] || !wzData['ideal_client_q1'].trim())
-        return "Step 9 — Ideal Client: please answer the first question about who you most want to help.";
+      if ((!wzData.ic_age_range || !wzData.ic_age_range.length) && !wzData.ic_age_range_custom && !wzData.ic_name && !wzData.ic_struggle)
+        return "Step 9 — Ideal Client: fill in at least one field to describe your ideal client (name, age range, or their main struggle).";
       break;
     case 10:
       if (!wzData.niche_provisional && (!wzData.niche_q1 || !wzData.niche_q1.trim()))
@@ -7741,9 +7756,10 @@ function renderRobPanel() {
       <button onclick="toggleRob()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#9ca3af;padding:4px;line-height:1;">✕</button>
     </div>
 
-    <div style="background:#f5f3ff;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#4b5563;line-height:1.5;">
-      👋 Hi! I'm Rob. Ask me anything about setting up your business, or tap a question below for instant guidance.
+    <div style="background:#f5f3ff;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#4b5563;line-height:1.5;">
+      👋 Hi! I'm Rob. Ask me anything about your business — pricing, marketing, clients, positioning. I'm here to help.
     </div>
+    ${!(typeof CONFIG !== 'undefined' && CONFIG.claudeApiKey) ? `<div style="background:#FEF9C3;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:#92400E;line-height:1.5;">⚡ Add your Claude API key in <strong>Settings → Integrations</strong> to make me AI-powered — I'll give much more personalised answers.</div>` : ''}
 
     <div style="margin-bottom:16px;">
       <div style="display:flex;gap:8px;">
@@ -7849,7 +7865,25 @@ async function askRobQuestion() {
   if (best && bestScore > 0) {
     ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>' + best.a;
   } else {
-    ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>That\'s a great question. The most important thing you can do right now is answer each section as specifically as possible — vague answers lead to vague suggestions, and the more specific you are, the better PlenusOS can tailor everything to your business. Start with who you help and what they\'re struggling with, and everything else will fall into place.';
+    // Try a smarter fallback based on question keywords
+    const fallbacks = [
+      { keys: ['price','charge','cost','fee','worth','rate','how much'], a: "Pricing is one of the hardest things to get right. A useful starting point: look at what a client pays you versus what they save in NHS appointments, sick days, or failed approaches over the next year. Most practitioners undercharge because they compare themselves to other practitioners rather than to the value of the result. What outcome does your work create — and what is that worth to someone who really needs it?" },
+      { keys: ['market','attract','get clients','find clients','social','instagram','post'], a: "The most effective marketing for a health practitioner isn't social media volume — it's specificity. One clear sentence about exactly who you help and exactly what changes for them will outperform 50 generic posts. Your niche and ideal client answers in the wizard feed directly into your website and content. Have you completed those steps yet? That's where to start." },
+      { keys: ['confidence','scared','nervous','afraid','imposter','ready','start'], a: "This is incredibly common and it doesn't go away completely — but it does get quieter. The practitioners who build thriving businesses are not the most confident ones, they're the most consistent ones. The setup wizard is designed so you can start very small and grow from there. You don't need everything perfect before you begin. What's the one first step that feels manageable?" },
+      { keys: ['niche','specialism','focus','specific','narrow','general'], a: "Narrowing your niche feels counterintuitive — it feels like turning clients away. But the opposite is true. The more specific you are about who you help and what you do, the more clearly your ideal client recognises themselves in your message and reaches out. 'Nutritional therapist for women in perimenopause' will convert better than 'nutritional therapist for everyone'. What group do you do your very best work with?" },
+      { keys: ['website','online','presence','google','seo','visible'], a: "Before you worry about Google or SEO, focus on having one very clear page that speaks directly to your ideal client. The website builder here will generate the copy once you've completed your brand and niche steps. The most important thing on the page is a single clear headline that says who you help and what changes for them — and a very easy way to book a call." },
+      { keys: ['testimonial','review','case study','proof','evidence'], a: "Social proof is powerful but most practitioners wait too long to ask for it. As soon as a client gets a result, ask them: 'Would you be willing to share what shifted for you in a sentence or two?' Most people are happy to. Even one or two honest testimonials — specific about the result — will do more for your conversion than any amount of credentials." },
+      { keys: ['discovery call','consultation','free','intro','first session'], a: "A free discovery call is one of the most effective tools you have — not to sell, but to listen. The goal is to understand exactly where the person is and whether you're the right fit. Ask what they've already tried, what's at stake if nothing changes, and what success looks like. When you listen well, the right clients self-select. Keep it to 20 minutes." }
+    ];
+    let matched = null;
+    for (const fb of fallbacks) {
+      if (fb.keys.some(k => ql.includes(k))) { matched = fb; break; }
+    }
+    if (matched) {
+      ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>' + matched.a;
+    } else {
+      ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>That\'s a great question. The most important thing you can do right now is answer each section of the wizard as specifically as possible — vague answers lead to vague suggestions, and the more specific you are, the better PlenusOS can tailor everything to your business. Start with who you help and what they\'re struggling with, and everything else will flow from there.';
+    }
   }
   ans.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -8194,6 +8228,7 @@ function refreshWebsiteFromProfile() {
   const practiceName = (PROFILE && PROFILE.practice_name) || (wzData && wzData.practice_name) || 'Your Practice';
   const name         = (PROFILE && PROFILE.name)          || '';
   const whatYouDo    = (wzData && wzData.brand_what_you_do) || (wzData && wzData.niche_statement) || '';
+  const personalBio  = (wzData && wzData.personal_bio) || '';
   const storyQ1      = (wzData && wzData.story_q1) || (PROFILE && PROFILE.qualifications) || '';
   const heroH1 = document.getElementById('wb-hero-h1');
   const heroP  = document.getElementById('wb-hero-p');
@@ -8208,8 +8243,10 @@ function refreshWebsiteFromProfile() {
   if (aboutH && name && aboutH.textContent.includes('Helen')) {
     aboutH.textContent = 'Hi, I\u2019m ' + name;
   }
-  if (aboutP && storyQ1 && storyQ1.length > 30 && aboutP.textContent.includes('registered nutritional')) {
-    aboutP.textContent = storyQ1;
+  // Use personal bio for About if available, otherwise fall back to story q1
+  const aboutText = personalBio || storyQ1;
+  if (aboutP && aboutText && aboutText.length > 20 && aboutP.textContent.includes('registered nutritional')) {
+    aboutP.textContent = aboutText;
   }
   // Populate services from wzData
   const services = wzData && wzData.services ? wzData.services.filter(s => s.name) : [];
