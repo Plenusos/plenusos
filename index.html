@@ -2002,7 +2002,7 @@ async function signIn(isRetry) {
     if (btn && btn.disabled) btn.textContent = 'Waking up the server — nearly there…';
   }, 20000);
 
-  // On first attempt: auto-retry after 45s. On retry: give up after 45s.
+  // On first attempt: auto-retry after 90s. On retry: give up after 90s.
   const timeoutTimer = setTimeout(() => {
     clearTimeout(slowTimer); clearTimeout(slowTimer2);
     if (!isRetry) {
@@ -2014,7 +2014,7 @@ async function signIn(isRetry) {
       showAuthError('Connection timed out. Please check your internet connection and try again.');
       if (btn) { btn.disabled = false; btn.textContent = 'Sign in →'; }
     }
-  }, 45000);
+  }, 90000);
 
   if (!sb) {
     clearTimeout(slowTimer); clearTimeout(slowTimer2); clearTimeout(timeoutTimer);
