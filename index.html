@@ -354,10 +354,10 @@ textarea{resize:vertical;min-height:90px;}
     <div class="nav-setup-step" onclick="showPage('website')" data-page="website">
       <div class="nav-step-num" id="sb-num-3">3</div><span>Online Presence</span>
     </div>
-    <div class="nav-setup-step" onclick="showPage('appointments')" data-page="appointments-setup">
+    <div class="nav-setup-step" onclick="openWizardAtStep(11)" data-page="appointments-setup">
       <div class="nav-step-num" id="sb-num-4">4</div><span>Services &amp; Pricing</span>
     </div>
-    <div class="nav-setup-step" onclick="showPage('appointments')" data-page="availability">
+    <div class="nav-setup-step" onclick="openSettingsAvailability()" data-page="availability">
       <div class="nav-step-num" id="sb-num-5">5</div><span>Your Availability</span>
     </div>
   </div>
@@ -947,19 +947,61 @@ textarea{resize:vertical;min-height:90px;}
           ↓ Scroll through your site sections below — click any text to edit it directly
         </div>
 
+        <!-- LOGO + NAV HEADER -->
+        <div style="background:#fff;border:1px solid var(--grey-200);border-radius:12px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div id="wb-logo-container" style="position:relative;">
+              <!-- Logo upload area -->
+              <div id="wb-logo-placeholder" style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--violet),var(--violet-light));display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;border:2px dashed transparent;transition:all 0.2s;" title="Tap to upload your logo" onclick="document.getElementById('wb-logo-input').click()">
+                <span id="wb-logo-letter" style="color:#fff;font-size:22px;font-weight:800;">${(PROFILE&&PROFILE.practice_name?PROFILE.practice_name[0]:'P')}</span>
+                <img id="wb-logo-img" src="" style="display:none;width:100%;height:100%;object-fit:contain;" alt="Logo">
+              </div>
+              <div style="position:absolute;bottom:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff;" onclick="document.getElementById('wb-logo-input').click()" title="Upload logo">
+                <span style="color:#fff;font-size:9px;font-weight:700;">+</span>
+              </div>
+              <input type="file" id="wb-logo-input" accept="image/*" style="display:none;" onchange="uploadWbLogo(this)">
+            </div>
+            <div>
+              <div contenteditable="true" id="wb-site-name" style="font-size:15px;font-weight:800;color:var(--charcoal);">${(PROFILE&&PROFILE.practice_name)||'Your Business Name'}</div>
+              <div style="font-size:10px;color:var(--grey-400);margin-top:1px;">Tap logo to upload · tap name to edit</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;">
+            <span contenteditable="true" style="font-size:12px;color:var(--grey-600);cursor:pointer;">Home</span>
+            <span contenteditable="true" style="font-size:12px;color:var(--grey-600);cursor:pointer;">About</span>
+            <span contenteditable="true" style="font-size:12px;color:var(--grey-600);cursor:pointer;">Services</span>
+            <span contenteditable="true" style="font-size:12px;color:var(--grey-600);cursor:pointer;">Contact</span>
+            <button contenteditable="false" class="wb-btn-primary" style="font-size:11px;padding:6px 14px;">Book Now</button>
+          </div>
+        </div>
+
         <!-- HERO SECTION -->
-        <div class="wb-section wb-hero">
+        <div class="wb-section wb-hero" style="position:relative;overflow:hidden;">
           <div class="wb-controls">
             <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="aiWriteSection('hero')">✨ AI Rewrite</button>
-            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="showToast('Section moved')">↕️ Move</button>
+            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="document.getElementById('wb-hero-bg-input').click()">🖼️ Hero Image</button>
           </div>
-          <div class="wb-inner">
+          <!-- Hero background image overlay -->
+          <div id="wb-hero-bg-overlay" style="display:none;position:absolute;inset:0;background-size:cover;background-position:center;z-index:0;opacity:0.15;pointer-events:none;"></div>
+          <input type="file" id="wb-hero-bg-input" accept="image/*" style="display:none;" onchange="uploadWbHeroBg(this)">
+          <div class="wb-inner" style="position:relative;z-index:1;">
             <div style="font-size:11px;font-weight:700;letter-spacing:1px;opacity:0.6;margin-bottom:8px;text-transform:uppercase;">Hero Section — click to edit</div>
             <h1 contenteditable="true" id="wb-hero-h1">Transform Your Health With Expert Nutritional Therapy</h1>
             <p contenteditable="true" id="wb-hero-p">I help busy women overcome fatigue, bloating, and hormonal imbalances through personalised nutrition plans rooted in clinical science — and real food you'll actually enjoy.</p>
             <div class="wb-cta-row">
               <button class="wb-btn-primary" contenteditable="true">Book a Free Discovery Call</button>
               <button class="wb-btn-secondary" contenteditable="true">Learn How It Works</button>
+            </div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.3);display:flex;gap:20px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.8);">
+                <span>⭐</span><span contenteditable="true">5.0 Google Reviews</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.8);">
+                <span>🎓</span><span contenteditable="true">mBANT, CNHC Registered</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.8);">
+                <span>💬</span><span contenteditable="true">Free discovery call available</span>
+              </div>
             </div>
           </div>
         </div>
@@ -968,14 +1010,27 @@ textarea{resize:vertical;min-height:90px;}
         <div class="wb-section wb-about" style="border:1px solid var(--grey-200);">
           <div class="wb-controls">
             <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="aiWriteSection('about')">✨ AI Rewrite</button>
+            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="document.getElementById('wb-photo-input').click()">📷 Upload Photo</button>
           </div>
+          <input type="file" id="wb-photo-input" accept="image/*" style="display:none;" onchange="uploadWbPhoto(this)">
           <div class="wb-inner">
             <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--grey-400);margin-bottom:8px;text-transform:uppercase;">About Section</div>
             <div style="display:flex;gap:24px;align-items:flex-start;">
-              <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--violet-light));display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:800;flex-shrink:0;">H</div>
+              <div style="position:relative;flex-shrink:0;">
+                <div id="wb-photo-placeholder" style="width:100px;height:120px;border-radius:14px;background:linear-gradient(135deg,#E8E0F0,#D4C5F0);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;border:2px dashed var(--grey-300);transition:all 0.2s;overflow:hidden;" onclick="document.getElementById('wb-photo-input').click()" title="Upload your photo">
+                  <img id="wb-photo-img" src="" style="display:none;width:100%;height:100%;object-fit:cover;" alt="Your photo">
+                  <span id="wb-photo-icon" style="font-size:28px;">👤</span>
+                  <span id="wb-photo-hint" style="font-size:9px;color:var(--grey-400);text-align:center;line-height:1.3;padding:0 6px;">Tap to add<br>your photo</span>
+                </div>
+              </div>
               <div style="flex:1;">
                 <h2 contenteditable="true" style="font-size:22px;font-weight:800;margin-bottom:8px;" id="wb-about-h">Hi, I'm Helen — Nutritional Therapist &amp; Gut Health Specialist</h2>
                 <p contenteditable="true" style="font-size:14px;color:var(--grey-600);line-height:1.7;" id="wb-about-p">I'm a registered nutritional therapist (mBANT, CNHC) with a passion for helping women feel energised, balanced, and in control of their health. After struggling with my own gut issues for years, I found the transformative power of food as medicine — and I've dedicated my career to sharing that with my clients.</p>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+                  <div style="padding:6px 12px;background:#F5F3FF;border-radius:20px;font-size:11px;color:var(--violet);font-weight:600;" contenteditable="true">mBANT Registered</div>
+                  <div style="padding:6px 12px;background:#F5F3FF;border-radius:20px;font-size:11px;color:var(--violet);font-weight:600;" contenteditable="true">CNHC Registered</div>
+                  <div style="padding:6px 12px;background:#F5F3FF;border-radius:20px;font-size:11px;color:var(--violet);font-weight:600;" contenteditable="true">10+ Years Experience</div>
+                </div>
               </div>
             </div>
           </div>
@@ -2409,19 +2464,32 @@ async function loadProfile() {
     }
   }
 
-  // Wizard in progress — check localStorage first (most reliable, no schema dependency)
-  const localRaw = localStorage.getItem(localKey);
-  if (localRaw) {
-    try {
-      const parsed = JSON.parse(localRaw);
-      if (parsed.step >= 1 && parsed.data) {
-        wzStep = parsed.step;
-        wzData = parsed.data;
-        showScreen('wizard');
-        renderWizardStep();
-        return;
-      }
-    } catch(e) { console.warn('Local wizard parse error:', e); }
+  // Wizard in progress — check ALL possible storage keys, pick the most advanced step
+  const keysToTry = [
+    localKey,
+    'plenusos_wz_current'
+  ];
+  let bestParsed = null;
+  for (const key of keysToTry) {
+    for (const store of [localStorage, sessionStorage]) {
+      try {
+        const raw = store.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.step >= 1 && parsed.data) {
+          if (!bestParsed || parsed.step > bestParsed.step) bestParsed = parsed;
+        }
+      } catch(e) {}
+    }
+  }
+  if (bestParsed) {
+    wzStep = bestParsed.step;
+    wzData = bestParsed.data;
+    // Normalise — make sure uid key is also populated
+    try { localStorage.setItem(localKey, JSON.stringify(bestParsed)); } catch(e) {}
+    showScreen('wizard');
+    renderWizardStep();
+    return;
   }
 
   // Fall back to Supabase wizard data
@@ -2574,7 +2642,9 @@ async function saveProfileSettings() {
     updated_at:     new Date().toISOString()
   };
 
-  const { error } = await sb.from('practitioner_profiles').update(updates).eq('id', currentUser.uid);
+  updates.id = currentUser.uid;
+  updates.email = updates.email || currentUser.email;
+  const { error } = await sb.from('practitioner_profiles').upsert(updates, { onConflict: 'id' });
 
   if (error) {
     showToast('❌ Error saving: ' + error.message);
@@ -4389,14 +4459,22 @@ function startWizard() {
 }
 
 async function saveWizardProgress() {
-  if (!currentUser) return;
-
-  // PRIMARY: localStorage — instant, no schema dependency, always reliable
+  // PRIMARY: localStorage — save to MULTIPLE keys so nothing is ever lost
+  const saveData = JSON.stringify({ step: wzStep, data: wzData });
   try {
-    localStorage.setItem('plenusos_wz_' + currentUser.uid, JSON.stringify({ step: wzStep, data: wzData }));
+    // Key 1: uid-based (most specific — used if user is signed in)
+    if (currentUser) {
+      localStorage.setItem('plenusos_wz_' + currentUser.uid, saveData);
+      sessionStorage.setItem('plenusos_wz_' + currentUser.uid, saveData);
+    }
+    // Key 2: fixed fallback — always written, regardless of auth state
+    localStorage.setItem('plenusos_wz_current', saveData);
+    sessionStorage.setItem('plenusos_wz_current', saveData);
   } catch(e) {
-    showToast('⚠️ Could not save locally: ' + e.message);
+    // Storage full or blocked — non-fatal
   }
+
+  if (!currentUser) return; // Supabase save requires auth
 
   // SECONDARY: Supabase — save ALL wizard fields so progress survives localStorage clear
   if (!sb) return;
@@ -4436,7 +4514,7 @@ async function saveWizardProgress() {
 let _autosaveTimer = null;
 function debounceAutosave() {
   if (_autosaveTimer) clearTimeout(_autosaveTimer);
-  _autosaveTimer = setTimeout(() => { collectWizardStep(wzStep); saveWizardProgress(); }, 1500);
+  _autosaveTimer = setTimeout(() => { collectWizardStep(wzStep); saveWizardProgress(); }, 600);
 }
 
 function renderWizardStep() {
@@ -5802,11 +5880,11 @@ function getInspirationHTML(questionId) {
   const id = 'insp-' + questionId;
   return `
     <div style="margin-top:8px;">
-      <button type="button" onclick="document.getElementById('${id}').style.display=document.getElementById('${id}').style.display==='none'?'block':'none';this.textContent=this.textContent.includes('▾')?'💡 Need a starter? ▸':'💡 Need a starter? ▾';"
+      <button type="button" onclick="document.getElementById('${id}').style.display=document.getElementById('${id}').style.display==='none'?'block':'none';var el=document.getElementById('${id}');el.style.display=el.style.display==='none'?'flex':'none';this.textContent=el.style.display==='none'?'💡 Need a starter? ▸':'💡 Need a starter? ▾';"
         style="background:none;border:none;padding:0;font-size:12px;color:var(--violet);cursor:pointer;font-weight:600;">
         💡 Need a starter? ▾
       </button>
-      <div id="${id}" style="display:none;margin-top:8px;display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;">
+      <div id="${id}" style="display:none;flex-wrap:wrap;gap:7px;margin-top:8px;">
         ${starters.map(s => `<button type="button" onclick="(function(){var t=document.getElementById('${textareaId}');if(t){t.value=t.value?t.value+' ':'';t.value+='${s.replace(/'/g,"\\'")}';t.focus();}})()" style="padding:6px 12px;background:#fff;border:1.5px solid var(--grey-200);border-radius:20px;font-size:11px;color:var(--grey-600);cursor:pointer;text-align:left;transition:all 0.15s;max-width:280px;white-space:normal;line-height:1.3;" onmouseover="this.style.borderColor='var(--violet)';this.style.color='var(--violet)';" onmouseout="this.style.borderColor='var(--grey-200)';this.style.color='var(--grey-600)';">${s}</button>`).join('')}
       </div>
     </div>`;
@@ -6041,12 +6119,11 @@ function getBrandPhaseContent(phase) {
             <div id="wz-custom-palette-body" style="display:${selPalette==='custom'?'block':'none'};margin-top:12px;">
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
                 ${[
-                  {id:'wz-custom-c1', label:'Primary colour',   idx:0, hint:'Your main brand colour'},
-                  {id:'wz-custom-c2', label:'Accent colour',    idx:1, hint:'A complementary or contrast colour'},
-                  {id:'wz-custom-c3', label:'Light / background',idx:2, hint:'Used for backgrounds and cards'},
-                  {id:'wz-custom-c4', label:'Highlight',        idx:3, hint:'For buttons, calls to action'}
+                  {id:'wz-custom-c1', label:'Primary colour',   idx:0, hint:'Your main brand colour — used for headings & key elements'},
+                  {id:'wz-custom-c2', label:'Accent colour',    idx:1, hint:'A complementary colour for buttons & highlights'},
+                  {id:'wz-custom-c3', label:'Background',       idx:2, hint:'Light tone used for section backgrounds & cards'}
                 ].map(({id,label,idx,hint}) => {
-                  const saved = wzData.brand_custom_swatches || ['#2C00CB','#8F61F7','#F5F3FF','#0B1538'];
+                  const saved = wzData.brand_custom_swatches || ['#2C00CB','#8F61F7','#F5F3FF'];
                   const val = saved[idx] || '#cccccc';
                   return `<div>
                     <div style="font-size:11px;font-weight:600;color:var(--charcoal);margin-bottom:4px;">${label}</div>
@@ -6063,8 +6140,8 @@ function getBrandPhaseContent(phase) {
               </div>
               <div style="display:flex;align-items:center;gap:10px;padding:12px;background:#fafafa;border-radius:10px;margin-bottom:12px;">
                 <div style="font-size:11px;color:var(--grey-500);font-weight:600;">Preview:</div>
-                ${[0,1,2,3].map(i => {
-                  const saved = wzData.brand_custom_swatches || ['#2C00CB','#8F61F7','#F5F3FF','#0B1538'];
+                ${[0,1,2].map(i => {
+                  const saved = wzData.brand_custom_swatches || ['#2C00CB','#8F61F7','#F5F3FF'];
                   return `<div id="wz-custom-preview-${i}" style="flex:1;height:28px;border-radius:6px;background:${saved[i]||'#ccc'};border:1px solid rgba(0,0,0,0.08);"></div>`;
                 }).join('')}
               </div>
@@ -6073,6 +6150,38 @@ function getBrandPhaseContent(phase) {
                 ✓ Use these colours
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- TYPOGRAPHY PICKER -->
+        <div style="margin-top:20px;border-top:1px solid var(--grey-100);padding-top:18px;">
+          <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--charcoal);margin-bottom:4px;">Typography</div>
+          <div style="font-size:11px;color:var(--grey-400);margin-bottom:14px;line-height:1.5;">Pick a font pairing for your headings, body text, and labels. You'll see a live preview of how each combination looks.</div>
+          <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500&family=Montserrat:wght@600;700&family=Open+Sans:wght@400;500&family=Cormorant+Garamond:wght@400;600&family=Lato:wght@400;700&family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            ${[
+              { key:'playfair-inter',     heading:'Playfair Display', body:'Inter',              label:'Classic & Refined',      desc:'Elegant headings, clean body — timeless authority' },
+              { key:'montserrat-open',    heading:'Montserrat',       body:'Open Sans',           label:'Modern & Approachable',  desc:'Strong headings, readable body — crisp and professional' },
+              { key:'cormorant-lato',     heading:'Cormorant Garamond',body:'Lato',              label:'Warm & Literary',        desc:'Soft editorial headings, warm body — feels personal' },
+              { key:'dm-serif-dm-sans',   heading:'DM Serif Display', body:'DM Sans',             label:'Bold & Contemporary',    desc:'High-impact headings, geometric body — modern confidence' }
+            ].map(font => {
+              const isSel = (wzData.brand_fonts || '') === font.key;
+              return `<div onclick="selectBrandFonts('${font.key}')"
+                style="padding:16px;border:2px solid ${isSel ? 'var(--violet)' : 'var(--grey-200)'};background:${isSel ? '#F5F3FF' : '#fff'};border-radius:12px;cursor:pointer;transition:all 0.2s;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                  <div>
+                    <span style="font-size:12px;font-weight:700;color:var(--charcoal);">${font.label}</span>
+                    <span style="font-size:11px;color:var(--grey-400);margin-left:8px;">${font.heading} + ${font.body}</span>
+                  </div>
+                  ${isSel ? '<span style="width:18px;height:18px;border-radius:50%;background:var(--violet);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0;">✓</span>' : ''}
+                </div>
+                <div style="border-left:3px solid ${isSel ? 'var(--violet)' : 'var(--grey-200)'};padding-left:12px;">
+                  <div style="font-family:'${font.heading}',serif;font-size:18px;font-weight:700;color:var(--charcoal);line-height:1.2;margin-bottom:4px;">Your Heading Title Here</div>
+                  <div style="font-family:'${font.body}',sans-serif;font-size:13px;color:var(--grey-600);line-height:1.5;margin-bottom:4px;">Body text looks like this — clear, readable, professional. This is how your service descriptions and page content will appear.</div>
+                  <div style="font-family:'${font.body}',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--grey-400);">LABEL / SUBTITLE TEXT</div>
+                </div>
+              </div>`;
+            }).join('')}
           </div>
         </div>`;
     }
@@ -6818,6 +6927,8 @@ function generateNicheDraft() {
 
 function addWizardService() {
   if (!wzData.services) wzData.services = [];
+  // Collect any typed data from existing service cards before adding a new one
+  collectWizardStep(11);
   wzData.services.push({ name:'', duration:'', description:'', delivery:'Online', price:'', price_type:'Per session', sliding_scale:false, evidence_based:false, payment_plan:false });
   renderWizardStep();
 }
@@ -6981,6 +7092,13 @@ function selectBrandFont(key) {
   });
 }
 
+function selectBrandFonts(key) {
+  wzData.brand_fonts = key;
+  debounceAutosave();
+  // Re-render to update the visual selection state
+  renderWizardStep();
+}
+
 function selectBrandImagery(key) {
   if (!wzData.brand_imagery_styles) wzData.brand_imagery_styles = wzData.brand_imagery_style ? [wzData.brand_imagery_style] : [];
   const idx = wzData.brand_imagery_styles.indexOf(key);
@@ -7048,6 +7166,30 @@ function updateSidebarSteps() {
   const done = sbSteps.filter(Boolean).length;
   const sbCount = document.getElementById('sb-setup-count');
   if (sbCount) sbCount.textContent = done + ' / ' + sbSteps.length;
+}
+
+function openWizardAtStep(step) {
+  wzStep = step;
+  const overlay = document.getElementById('overlay-wizard');
+  if (overlay) {
+    overlay.style.display = 'flex';
+    renderWizardStep();
+  }
+}
+
+function openSettingsAvailability() {
+  showPage('settings');
+  setTimeout(function() {
+    const panel = document.getElementById('s-avail-sect');
+    const body  = document.getElementById('sp-body-6');
+    const btn   = document.getElementById('sp-collapse-6');
+    if (body && body.style.display === 'none') {
+      body.style.display = 'block';
+      if (btn) btn.textContent = 'Collapse';
+    }
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    loadAvailability();
+  }, 200);
 }
 
 function toggleAvailDay(checkbox, day) {
@@ -7165,6 +7307,7 @@ async function wizardNext() {
   if (err) { showWizardError(err); return; }
   clearWizardError();
   await saveWizardProgress();
+  showToast('💾 Step saved');
   if (wzStep < WIZARD_STEPS.length) {
     wzStep++;
     renderWizardStep();
@@ -7647,39 +7790,68 @@ const ROB_SMART_ANSWERS = [
   { keys: ['time','long','how long','finish'], a: "Most practitioners complete the full setup in 20–30 minutes. You can go at your own pace and come back at any time — your progress is always saved." }
 ];
 
-function askRobQuestion() {
+async function askRobQuestion() {
   const input = document.getElementById('rob-question-input');
   if (!input) return;
-  const q = input.value.trim().toLowerCase();
+  const q = input.value.trim();
   if (!q) return;
+  const ql = q.toLowerCase();
 
   const ans = document.getElementById('rob-answer');
   if (!ans) return;
 
-  // Find best match
+  // Show loading state
+  ans.style.display = 'block';
+  ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong><span style="color:#9ca3af;font-style:italic;">Thinking…</span>';
+  input.value = '';
+
+  // Try Claude API if key is available
+  const apiKey = (typeof CONFIG !== 'undefined') && CONFIG.claudeApiKey;
+  if (apiKey) {
+    try {
+      const contextParts = [];
+      if (wzData && wzData.practice_types && wzData.practice_types.length) contextParts.push('Practice: ' + wzData.practice_types.join(', '));
+      if (wzData && wzData.niche_statement) contextParts.push('Niche: ' + wzData.niche_statement);
+      if (wzData && wzData.brand_what_you_do) contextParts.push('What they do: ' + wzData.brand_what_you_do);
+      if (PROFILE && PROFILE.practice_name) contextParts.push('Business: ' + PROFILE.practice_name);
+      const ctxStr = contextParts.length ? ' Context: ' + contextParts.join('. ') + '.' : '';
+      const systemPrompt = 'You are Rob, a friendly and knowledgeable business coach for UK health and wellness practitioners using PlenusOS. Give warm, practical, specific advice in plain UK English. Keep answers to 2-4 sentences. No bullet points. Be encouraging but direct. End with one concrete next step.' + ctxStr;
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 250, system: systemPrompt, messages: [{ role: 'user', content: q }] })
+      });
+      const data = await res.json();
+      const text = data.content && data.content[0] && data.content[0].text;
+      if (text) {
+        ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>' + text.replace(/\n/g, '<br>');
+        ans.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+    } catch(e) { /* fall through to keyword matching */ }
+  }
+
+  // Keyword matching fallback
   let best = null;
   let bestScore = 0;
   for (const entry of ROB_SMART_ANSWERS) {
-    const score = entry.keys.filter(k => q.includes(k)).length;
+    const score = entry.keys.filter(k => ql.includes(k)).length;
     if (score > bestScore) { bestScore = score; best = entry; }
   }
 
-  // Also check context tips
   const tips = ROB_TIPS[robContext] || ROB_TIPS.default;
   for (const tip of tips) {
     const tipWords = tip.q.toLowerCase().split(' ');
-    const score = tipWords.filter(w => w.length > 3 && q.includes(w)).length;
+    const score = tipWords.filter(w => w.length > 3 && ql.includes(w)).length;
     if (score > bestScore) { bestScore = score; best = { a: tip.a }; }
   }
 
-  ans.style.display = 'block';
   if (best && bestScore > 0) {
     ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>' + best.a;
   } else {
-    ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>Great question! I don\'t have a specific answer for that yet, but here\'s my general advice: take your time with each section, answer as honestly as you can, and remember every field you fill in helps your AI assistant give you better, more personalised suggestions for your business.';
+    ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>That\'s a great question. The most important thing you can do right now is answer each section as specifically as possible — vague answers lead to vague suggestions, and the more specific you are, the better PlenusOS can tailor everything to your business. Start with who you help and what they\'re struggling with, and everything else will fall into place.';
   }
   ans.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  input.value = '';
 }
 // ══════════════════════════════════════
 // SETTINGS SECTION COMPLETION
@@ -7972,6 +8144,51 @@ function loadAvailabilityFromWizard() {
 // ══════════════════════════════════════
 // WEBSITE BUILDER — populate from wizard data
 // ══════════════════════════════════════
+function uploadWbLogo(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.getElementById('wb-logo-img');
+    const letter = document.getElementById('wb-logo-letter');
+    if (img) { img.src = e.target.result; img.style.display = 'block'; }
+    if (letter) letter.style.display = 'none';
+    showToast('✅ Logo uploaded — click Save to keep it');
+  };
+  reader.readAsDataURL(file);
+}
+
+function uploadWbPhoto(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.getElementById('wb-photo-img');
+    const icon = document.getElementById('wb-photo-icon');
+    const hint = document.getElementById('wb-photo-hint');
+    if (img) { img.src = e.target.result; img.style.display = 'block'; }
+    if (icon) icon.style.display = 'none';
+    if (hint) hint.style.display = 'none';
+    showToast('✅ Photo uploaded');
+  };
+  reader.readAsDataURL(file);
+}
+
+function uploadWbHeroBg(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const overlay = document.getElementById('wb-hero-bg-overlay');
+    if (overlay) {
+      overlay.style.backgroundImage = 'url(' + e.target.result + ')';
+      overlay.style.display = 'block';
+    }
+    showToast('✅ Hero image set');
+  };
+  reader.readAsDataURL(file);
+}
+
 function refreshWebsiteFromProfile() {
   if (!wzData && !PROFILE) return;
   const practiceName = (PROFILE && PROFILE.practice_name) || (wzData && wzData.practice_name) || 'Your Practice';
