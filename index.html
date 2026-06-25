@@ -4419,21 +4419,38 @@ function getWizardStepHTML(step) {
           </div>`;
       }
       if (jp === 3) {
-        const challenges = ['Not enough clients','Irregular income','Marketing myself effectively','Lack of confidence or visibility','Too much admin and not enough client time','Finding the right clients, not just any clients','Charging what my work is worth','Burnout or sustainability','Moving from employed to self-employed','Scaling without burning out','Building an online presence from scratch','Something else'];
+        const challengeGroups = [
+          { label:'Clients & Income', items:['Not enough clients','Finding the right clients, not just any clients','Irregular income','Charging what my work is worth'] },
+          { label:'Visibility & Marketing', items:['Marketing myself effectively','Lack of confidence or visibility','Building an online presence from scratch'] },
+          { label:'Running the Practice', items:['Too much admin and not enough client time','Moving from employed to self-employed','Scaling without burning out','Burnout or sustainability'] },
+          { label:'Other', items:['Something else'] }
+        ];
+        const allChallenges = challengeGroups.flatMap(g => g.items);
         const saved = wzData.journey_challenges || [];
+        const selCount = allChallenges.filter(c => saved.includes(c)).length;
         return `
           <div>
             <div style="display:flex;gap:6px;margin-bottom:16px;">${navDots}</div>
-            <div style="font-size:14px;font-weight:600;color:var(--charcoal);margin-bottom:4px;">What is your biggest challenge right now?</div>
-            <div style="font-size:12px;color:var(--grey-500);margin-bottom:14px;">Select all that apply — this helps us prioritise what to focus on first.</div>
-            <div style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;padding-right:4px;margin-bottom:16px;">
-              ${challenges.map((c, i) => {
-                const checked = saved.includes(c);
-                return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--grey-200);border-radius:10px;">
-                  <input type="checkbox" id="wz-ch-${i}" ${checked ? 'checked' : ''} style="width:17px;height:17px;flex-shrink:0;accent-color:var(--violet);">
-                  <label for="wz-ch-${i}" style="font-size:13px;color:var(--charcoal);cursor:pointer;flex:1;">${c}</label>
-                </div>`;
-              }).join('')}
+            <div style="font-size:14px;font-weight:600;color:var(--charcoal);margin-bottom:4px;">What challenges are you facing right now?</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div style="font-size:12px;color:var(--grey-500);">Tick everything that applies — you can select as many as you like.</div>
+              <div id="wz-ch-count" style="font-size:12px;font-weight:700;color:var(--violet);white-space:nowrap;">${selCount > 0 ? selCount + ' selected' : ''}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:16px;">
+              ${challengeGroups.map(group => `
+                <div>
+                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--grey-400);margin-bottom:8px;">${group.label}</div>
+                  <div style="display:flex;flex-direction:column;gap:6px;">
+                    ${group.items.map((c) => {
+                      const idx = allChallenges.indexOf(c);
+                      const checked = saved.includes(c);
+                      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1.5px solid ${checked ? 'var(--violet)' : 'var(--grey-200)'};border-radius:10px;background:${checked ? '#F5F3FF' : '#fff'};" onclick="(function(){const cb=document.getElementById('wz-ch-${idx}');cb.checked=!cb.checked;const cnt=document.querySelectorAll('[id^=wz-ch-]:checked').length;const el=document.getElementById('wz-ch-count');if(el)el.textContent=cnt>0?cnt+' selected':'';this.style.border=cb.checked?'1.5px solid var(--violet)':'1.5px solid var(--grey-200)';this.style.background=cb.checked?'#F5F3FF':'#fff';}).call(this)">
+                        <input type="checkbox" id="wz-ch-${idx}" ${checked ? 'checked' : ''} style="width:17px;height:17px;flex-shrink:0;accent-color:var(--violet);pointer-events:none;">
+                        <label style="font-size:13px;color:var(--charcoal);cursor:pointer;flex:1;pointer-events:none;">${c}</label>
+                      </div>`;
+                    }).join('')}
+                  </div>
+                </div>`).join('')}
             </div>
             <div style="display:flex;justify-content:space-between;">
               <button class="btn btn-secondary" onclick="wzData.journey_phase=2;renderWizardStep();" style="padding:8px 14px;font-size:12px;">← Back</button>
@@ -4475,19 +4492,23 @@ function getWizardStepHTML(step) {
       ];
       const current = questions[q - 1];
       const allAnswered = questions.every(qu => wzData[qu.id]);
+      const storyDoneCount = questions.filter(qu => wzData[qu.id]).length;
       return `
         <div style="margin-bottom:16px;">
-          <div style="display:flex;gap:6px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:700;color:var(--violet);">9 questions — tap a dot to jump to any question</div>
+            <div style="font-size:12px;color:var(--grey-500);">${storyDoneCount}/9 answered</div>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
             ${questions.map((qu, i) => {
               const n = i + 1;
               const done = !!wzData[qu.id];
               const active = n === q;
-              return `<div onclick="goStoryQ(${n})" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;
+              return `<div onclick="goStoryQ(${n})" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;
                 border:2px solid ${active ? 'var(--violet)' : done ? 'var(--violet)' : 'var(--grey-200)'};
                 background:${active ? 'var(--violet)' : done ? '#F5F3FF' : '#fff'};
                 color:${active ? '#fff' : done ? 'var(--violet)' : 'var(--grey-400)'};">${done && !active ? '✓' : n}</div>`;
             }).join('')}
-            <div style="flex:1;display:flex;align-items:center;"><div style="height:1px;background:var(--grey-100);flex:1;margin:0 4px;"></div></div>
           </div>
           <div style="background:#F5F3FF;border-left:3px solid var(--violet);padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:14px;">
             <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--violet);margin-bottom:4px;">${assistantName} asks</div>
@@ -4663,14 +4684,19 @@ function getWizardStepHTML(step) {
       ];
       const current = questions[q - 1];
       const allAnswered = questions.every(qu => wzData[qu.id]);
+      const doneCount = questions.filter(qu => wzData[qu.id]).length;
       return `
         <div style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:700;color:var(--violet);">5 questions — tap a dot to jump to any question</div>
+            <div style="font-size:12px;color:var(--grey-500);">${doneCount}/5 answered</div>
+          </div>
           <div style="display:flex;gap:6px;margin-bottom:16px;">
             ${questions.map((qu, i) => {
               const n = i + 1;
               const done = !!wzData[qu.id];
               const active = n === q;
-              return `<div onclick="goPhilosophyQ(${n})" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;
+              return `<div onclick="goPhilosophyQ(${n})" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;
                 border:2px solid ${active ? 'var(--violet)' : done ? 'var(--violet)' : 'var(--grey-200)'};
                 background:${active ? 'var(--violet)' : done ? '#F5F3FF' : '#fff'};
                 color:${active ? '#fff' : done ? 'var(--violet)' : 'var(--grey-400)'};">${done && !active ? '✓' : n}</div>`;
@@ -6090,9 +6116,13 @@ function collectWizardStep(step) {
       wzData.group_slots       = g('wz-group-slots')         || wzData.group_slots;
       wzData.vision_antivision = g('wz-vision-antivision')   || wzData.vision_antivision;
       break;
-    case 8:
+    case 8: {
+      const curPhilQ = wzData.philosophy_q || 1;
+      const curPhilVal = document.getElementById('wz-philosophy-current')?.value || '';
+      if (curPhilVal) wzData['philosophy_q' + curPhilQ] = curPhilVal;
       wzData.philosophy_statement = g('wz-philosophy-text') || wzData.philosophy_statement;
       break;
+    }
     case 9: {
       const icCurrentQ = wzData.ideal_client_q || 1;
       const icVal = document.getElementById('wz-ic-current')?.value || '';
@@ -6574,10 +6604,16 @@ function validateWizardStep(step) {
       if (!wzData.vision_1yr || !wzData.vision_1yr.trim())
         return "Step 7 — Vision: please answer 'Where do you want your practice to be in one year?' before continuing.";
       break;
-    case 8:
-      if (!wzData.philosophy_statement || !wzData.philosophy_statement.trim())
-        return "Step 8 — Philosophy: please write your practice philosophy statement before continuing.";
+    case 8: {
+      const philQs = ['What do you believe about the people you help?','What do you believe about the change your work makes possible?','What does working with you feel like?','What do you want someone to feel within 30 seconds of landing on your website?','What would you never want to be known for?'];
+      for (let i = 0; i < philQs.length; i++) {
+        const key = 'philosophy_q' + (i + 1);
+        if (!wzData[key] || !wzData[key].trim()) {
+          return 'Step 8 — Philosophy Q' + (i+1) + ': "' + philQs[i] + '" hasn\'t been answered yet. Use the numbered dots to jump to it.';
+        }
+      }
       break;
+    }
     case 9:
       if (!wzData['ideal_client_q1'] || !wzData['ideal_client_q1'].trim())
         return "Step 9 — Ideal Client: please answer the first question about who you most want to help.";
