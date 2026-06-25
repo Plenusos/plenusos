@@ -5517,11 +5517,11 @@ function getBrandPhaseContent(phase) {
         <input type="text" id="wz-brand-name" class="wz-input" placeholder="e.g. Root &amp; Restore, The Wellbeing Studio" value="${wzData.practice_name||''}">
       </div>
       <div class="form-group" style="margin-bottom:12px;">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
           <label style="font-weight:600;font-size:13px;">What you do <span style="font-weight:400;color:var(--grey-400);">one sentence</span></label>
-          <span style="font-size:11px;color:var(--grey-400);">How a stranger would describe you</span>
+          <button type="button" onclick="generateWhatYouDo()" style="padding:5px 12px;border-radius:20px;border:1.5px solid var(--violet);background:none;color:var(--violet);font-size:11px;font-weight:700;cursor:pointer;">✨ ${assistantName} can write this</button>
         </div>
-        <textarea id="wz-brand-wyd" class="wz-input" style="min-height:60px;" oninput="debounceAutosave()" placeholder="e.g. I help busy women in their 40s reclaim energy through personalised nutrition.">${wzData.brand_what_you_do||''}</textarea>
+        <textarea id="wz-brand-wyd" class="wz-input" style="min-height:60px;margin-top:6px;" oninput="debounceAutosave()" placeholder="e.g. I help busy women in their 40s reclaim energy through personalised nutrition.">${wzData.brand_what_you_do||''}</textarea>
         <div style="margin-top:8px;background:#f5f3ff;border-radius:10px;padding:12px 14px;">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--violet);margin-bottom:8px;">Formula → I help [who] [do / feel / achieve what]</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
@@ -5861,37 +5861,49 @@ function getBrandPhaseContent(phase) {
           </div>
 
           <div style="margin-bottom:18px;">
-            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--charcoal);margin-bottom:4px;">Imagery style</div>
-            <div style="font-size:11px;color:var(--grey-400);margin-bottom:10px;line-height:1.5;">This shapes which images are surfaced in your library — choose the style that feels most like your practice.</div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--charcoal);margin-bottom:4px;">Imagery style <span style="font-weight:400;color:var(--grey-400);">— pick as many as feel right</span></div>
+            <div style="font-size:11px;color:var(--grey-500);margin-bottom:12px;line-height:1.5;">Your practice might be clinical <em>and</em> warm, or nature-inspired <em>and</em> modern. Select everything that fits — your image library will blend them.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
               ${[
-                { key:'real-people',    label:'Real People & Natural Light', desc:'Authentic moments — real practitioners, real clients, natural settings. Builds trust and warmth.' },
-                { key:'clean-minimal',  label:'Clean & Minimal',             desc:'Simple compositions, white space, calm palettes. Works beautifully for clinical or modern brands.' },
-                { key:'nature-organic', label:'Nature & Botanical',          desc:'Plants, herbs, textures, outdoor light. Perfect for holistic, integrative, or natural health practices.' },
-                { key:'clinical-pro',   label:'Clinical & Professional',     desc:'Clean settings, precision, expertise signals. Great for evidence-based or medical-adjacent practices.' },
-                { key:'warm-lifestyle', label:'Warm Lifestyle',              desc:'Everyday thriving — cosy interiors, warm light, people feeling well. Relatable and aspirational.' }
+                { key:'nature-organic', label:'Nature & Botanical',       colours:['#2D6A4F','#6A994E','#A7C957','#F2E8C6'], desc:'Plants, herbs, outdoor light. Holistic & integrative.' },
+                { key:'clinical-pro',   label:'Clinical & Professional',  colours:['#F8FAFC','#CBD5E1','#475569','#0F172A'], desc:'Precision, white space, expertise. Evidence-based.' },
+                { key:'warm-lifestyle', label:'Warm Lifestyle',           colours:['#FFF7ED','#FED7AA','#FB923C','#9A3412'], desc:'Cosy interiors, golden light. Relatable & aspirational.' },
+                { key:'real-people',    label:'Real People',              colours:['#FEF9C3','#FDE68A','#D97706','#92400E'], desc:'Authentic moments, natural settings. Builds trust.' },
+                { key:'clean-minimal',  label:'Clean & Minimal',          colours:['#FFFFFF','#F1F5F9','#94A3B8','#334155'], desc:'White space, calm palettes. Modern & clinical.' },
+                { key:'luxury-premium', label:'Luxury & Premium',         colours:['#1E0A3C','#4C1D95','#C084FC','#FDE68A'], desc:'Rich, refined, high-touch. Premium practices.' },
+                { key:'coastal-fresh',  label:'Coastal & Fresh',          colours:['#F0F9FF','#BAE6FD','#0284C7','#164E63'], desc:'Airy, light, clean blues. Fresh & energising.' },
+                { key:'earthy-raw',     label:'Earthy & Textured',        colours:['#FEF3C7','#D4A373','#A0522D','#3D1C02'], desc:'Raw textures, terracotta, clay. Grounded & honest.' }
               ].map(img => {
-                const isSel = selStyle === img.key;
+                const selStyles = wzData.brand_imagery_styles || (wzData.brand_imagery_style ? [wzData.brand_imagery_style] : []);
+                const isSel = selStyles.includes(img.key);
                 return `<div onclick="selectBrandImagery('${img.key}')" id="wz-bi-${img.key}"
-                  style="padding:12px 14px;border:2px solid ${isSel?'var(--violet)':'var(--grey-200)'};background:${isSel?'#F5F3FF':'#fff'};border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s;">
-                  <div>
-                    <div style="font-weight:700;font-size:13px;color:var(--charcoal);">${img.label}</div>
-                    <div style="font-size:11px;color:var(--grey-500);margin-top:2px;line-height:1.4;">${img.desc}</div>
+                  style="border:2px solid ${isSel?'var(--violet)':'var(--grey-200)'};background:${isSel?'#F5F3FF':'#fff'};border-radius:12px;cursor:pointer;overflow:hidden;transition:all 0.2s;position:relative;">
+                  <div style="display:flex;height:36px;">
+                    ${img.colours.map(c=>`<div style="flex:1;background:${c};"></div>`).join('')}
                   </div>
-                  ${isSel?`<div style="width:18px;height:18px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0;">✓</div>`:''}
+                  <div style="padding:8px 10px;">
+                    <div style="font-weight:700;font-size:12px;color:var(--charcoal);display:flex;align-items:center;gap:4px;">
+                      ${img.label}
+                      ${isSel?`<span style="margin-left:auto;width:16px;height:16px;border-radius:50%;background:var(--violet);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:9px;flex-shrink:0;">✓</span>`:''}
+                    </div>
+                    <div style="font-size:10px;color:var(--grey-500);margin-top:2px;line-height:1.4;">${img.desc}</div>
+                  </div>
                 </div>`;
               }).join('')}
             </div>
           </div>
 
           <div style="border-top:1px solid var(--grey-100);padding-top:16px;margin-bottom:18px;">
-            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--charcoal);margin-bottom:4px;">Brand keywords</div>
-            <div style="font-size:11px;color:var(--grey-400);margin-bottom:10px;line-height:1.5;">Words that capture how your brand feels — your AI assistant uses these to keep your copy, image suggestions, and content consistent. Tap any that fit, or add your own.</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+              <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--charcoal);">Brand keywords</div>
+              <div id="wz-kw-count" style="font-size:12px;font-weight:700;color:var(--violet);">${(wzData.brand_keywords_list||[]).length}/6</div>
+            </div>
+            <div style="font-size:11px;color:var(--grey-400);margin-bottom:10px;line-height:1.5;">Choose up to 6 words that capture your brand feel — used to keep your copy, images, and content consistent.</div>
             <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;">
               ${kwList.map(w => {
                 const sel = selKws.includes(w);
                 return `<button type="button"
-                  onclick="(function(){var arr=wzData.brand_keywords_list||[];var i=arr.indexOf('${w}');if(i>-1)arr.splice(i,1);else arr.push('${w}');wzData.brand_keywords_list=arr;document.querySelectorAll('[data-kw]').forEach(el=>{var a=(wzData.brand_keywords_list||[]).includes(el.dataset.kw);el.style.background=a?'#F5F3FF':'#fff';el.style.borderColor=a?'var(--violet)':'var(--grey-200)';el.style.color=a?'var(--violet)':'var(--grey-600)';el.style.fontWeight=a?'700':'400';});})();"
+                  onclick="(function(){var arr=wzData.brand_keywords_list||[];var i=arr.indexOf('${w}');if(i>-1)arr.splice(i,1);else if(arr.length<6)arr.push('${w}');else{showToast('Choose up to 6 keywords — remove one first to swap');return;}wzData.brand_keywords_list=arr;var cnt=document.getElementById('wz-kw-count');if(cnt)cnt.textContent=arr.length+'/6';document.querySelectorAll('[data-kw]').forEach(el=>{var a=(wzData.brand_keywords_list||[]).includes(el.dataset.kw);el.style.background=a?'#F5F3FF':'#fff';el.style.borderColor=a?'var(--violet)':'var(--grey-200)';el.style.color=a?'var(--violet)':'var(--grey-600)';el.style.fontWeight=a?'700':'400';});})();"
                   data-kw="${w}"
                   style="padding:6px 12px;border-radius:20px;border:1.5px solid ${sel?'var(--violet)':'var(--grey-200)'};background:${sel?'#F5F3FF':'#fff'};color:${sel?'var(--violet)':'var(--grey-600)'};font-size:12px;font-weight:${sel?'700':'400'};cursor:pointer;transition:all 0.15s;">${w}</button>`;
               }).join('')}
@@ -6562,12 +6574,51 @@ function selectBrandFont(key) {
 }
 
 function selectBrandImagery(key) {
-  wzData.brand_imagery_style = key;
+  if (!wzData.brand_imagery_styles) wzData.brand_imagery_styles = wzData.brand_imagery_style ? [wzData.brand_imagery_style] : [];
+  const idx = wzData.brand_imagery_styles.indexOf(key);
+  if (idx > -1) wzData.brand_imagery_styles.splice(idx, 1);
+  else wzData.brand_imagery_styles.push(key);
+  wzData.brand_imagery_style = wzData.brand_imagery_styles[0] || null;
   document.querySelectorAll('[id^="wz-bi-"]').forEach(el => {
-    const active = el.id === 'wz-bi-' + key;
-    el.style.border = active ? '2px solid var(--violet)' : '2px solid var(--grey-200)';
-    el.style.background = active ? '#F5F3FF' : '#fff';
+    const k = el.id.replace('wz-bi-','');
+    const sel = (wzData.brand_imagery_styles || []).includes(k);
+    el.style.border = sel ? '2px solid var(--violet)' : '2px solid var(--grey-200)';
+    el.style.background = sel ? '#F5F3FF' : '#fff';
   });
+}
+
+function generateWhatYouDo() {
+  const ta = document.getElementById('wz-brand-wyd');
+  if (!ta) return;
+  const btn = ta.parentElement ? ta.parentElement.querySelector('button[onclick*="generateWhatYouDo"]') : null;
+  if (btn) { btn.disabled = true; btn.textContent = '✨ Writing…'; }
+  // Build sentence from collected wizard data
+  const types = (wzData.practice_types || []).join(', ').toLowerCase();
+  const who = (wzData.niche_q1 || wzData.ideal_client_q1 || '').trim();
+  const what = (wzData.niche_q2 || '').trim();
+  const result = (wzData.niche_q3 || '').trim();
+  const spec = (wzData.specialist_area || '').trim();
+  const location = wzData.work_location_type === 'online' ? 'online' : wzData.work_location_type === 'both' ? 'in person and online' : 'in person';
+
+  let sentence = '';
+  if (who && result) {
+    sentence = 'I help ' + who + (what ? ' to ' + what.toLowerCase().replace(/^to\s+/i,'') : '') + ', so they can ' + result.toLowerCase().replace(/^so (they|you) can\s*/i,'').replace(/^they\s+/i,'') + '.';
+  } else if (who && what) {
+    sentence = 'I help ' + who + ' to ' + what.toLowerCase().replace(/^to\s+/i,'') + '.';
+  } else if (types) {
+    const t = types.charAt(0).toUpperCase() + types.slice(1);
+    sentence = t + ' practitioner working ' + location + (who ? ', supporting ' + who.toLowerCase() : '') + '.';
+  } else {
+    sentence = 'Holistic health practitioner working ' + location + '.';
+  }
+  if (spec) sentence += ' Specialist in ' + spec.toLowerCase().replace(/\.$/, '') + '.';
+
+  setTimeout(function() {
+    ta.value = sentence;
+    wzData.brand_what_you_do = sentence;
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Regenerate'; }
+    ta.focus();
+  }, 400);
 }
 
 function toggleAvailDay(checkbox, day) {
