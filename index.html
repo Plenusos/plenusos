@@ -161,8 +161,11 @@ textarea{resize:vertical;min-height:90px;}
 .nf-overlay.active{display:flex;}
 .nf-overlay-card{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.12);width:100%;max-width:480px;padding:28px;position:relative;}
 .nf-overlay-card.wide{max-width:640px;}
-#overlay-wizard .nf-overlay-card{max-height:92vh;display:flex;flex-direction:column;padding:16px 24px;overflow:hidden;}
-#wz-body{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;padding-right:4px;-webkit-overflow-scrolling:touch;}
+#overlay-wizard{overflow-y:hidden;}
+#overlay-wizard .nf-overlay-card{height:94vh;max-height:94vh;display:flex;flex-direction:column;padding:12px 20px;overflow:hidden;}
+#overlay-wizard .nf-logo img{max-height:52px;width:auto;}
+#overlay-wizard .nf-logo{margin-bottom:6px;}
+#wz-body{flex:1;overflow-y:scroll;overflow-x:hidden;min-height:0;height:0;padding-right:4px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;}
 .nf-logo{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .nf-logo-mark{width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
 .nf-logo-text{font-size:20px;font-weight:700;}
