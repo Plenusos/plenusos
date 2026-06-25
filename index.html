@@ -352,7 +352,7 @@ textarea{resize:vertical;min-height:90px;}
       <div class="nav-step-num cur" id="sb-num-2">2</div><span>Your Profile</span>
     </div>
     <div class="nav-setup-step" onclick="showPage('website')" data-page="website">
-      <div class="nav-step-num" id="sb-num-3">3</div><span>Your Website</span>
+      <div class="nav-step-num" id="sb-num-3">3</div><span>Online Presence</span>
     </div>
     <div class="nav-setup-step" onclick="showPage('appointments')" data-page="appointments-setup">
       <div class="nav-step-num" id="sb-num-4">4</div><span>Services &amp; Pricing</span>
@@ -519,7 +519,7 @@ textarea{resize:vertical;min-height:90px;}
           </div>
           <div style="text-align:center;padding:8px 4px;border-radius:8px;background:var(--grey-50);border:1px solid var(--grey-200);">
             <div style="font-size:16px;margin-bottom:2px;" id="db-step-icon-4">○</div>
-            <div style="font-size:10px;font-weight:600;color:var(--grey-500);" id="db-step-label-4">Your Website</div>
+            <div style="font-size:10px;font-weight:600;color:var(--grey-500);" id="db-step-label-4">Online Presence</div>
           </div>
           <div style="text-align:center;padding:8px 4px;border-radius:8px;background:var(--grey-50);border:1px solid var(--grey-200);">
             <div style="font-size:16px;margin-bottom:2px;" id="db-step-icon-5">○</div>
@@ -923,15 +923,28 @@ textarea{resize:vertical;min-height:90px;}
     <div id="page-website" class="page">
       <div class="card" style="margin-bottom:12px;">
         <div class="card-header">
-          <div><div class="card-title">Website Builder</div><div class="card-sub">Click any text to edit it directly · Use AI to write the first draft · Publish when ready</div></div>
+          <div>
+            <div class="card-title">Website Builder</div>
+            <div class="card-sub">Click any text to edit · Use AI to write the first draft · One-page site with all your key sections</div>
+          </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn-ai" onclick="aiWriteWebsite()">✨ AI Write All Copy <span class="ai-badge">AI</span></button>
-            <button class="btn btn-secondary" onclick="showToast('Preview opening…')">👁️ Preview</button>
-            <button class="btn btn-primary" onclick="showToast('✅ Site published to nutriflow.uk!')">🚀 Publish</button>
+            <button class="btn btn-secondary" onclick="showToast('Full preview coming soon')">👁️ Preview</button>
+            <button class="btn btn-primary" onclick="showToast('Publishing coming soon — add your domain in Online Presence first')">🚀 Publish</button>
           </div>
         </div>
-        <div style="background:var(--grey-100);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--grey-600);display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-          <span>🌐</span><span>https://nutriflow.uk</span><span style="margin-left:auto;" class="tag tag-green">● Live</span>
+
+        <!-- Browser address bar mockup -->
+        <div style="background:#F3F4F6;border:1px solid var(--grey-200);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;margin-bottom:0;">
+          <div style="display:flex;gap:5px;"><div style="width:10px;height:10px;border-radius:50%;background:#FC5F57;"></div><div style="width:10px;height:10px;border-radius:50%;background:#FEBC2E;"></div><div style="width:10px;height:10px;border-radius:50%;background:#28C840;"></div></div>
+          <div style="flex:1;background:#fff;border:1px solid var(--grey-200);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--grey-500);display:flex;align-items:center;gap:6px;">
+            <span>🔒</span><span id="wb-domain-display">${(window.wzData&&window.wzData.social_other)||'yourdomain.co.uk'}</span>
+          </div>
+          <span style="font-size:10px;font-weight:600;color:#059669;background:#DCFCE7;padding:2px 8px;border-radius:10px;">● Preview</span>
+        </div>
+
+        <div style="border-top:1px solid var(--grey-100);margin-top:10px;padding-top:4px;font-size:11px;color:var(--grey-400);text-align:center;">
+          ↓ Scroll through your site sections below — click any text to edit it directly
         </div>
 
         <!-- HERO SECTION -->
@@ -2426,7 +2439,11 @@ async function loadProfile() {
       'brand_palette','brand_custom_swatches','brand_fonts','brand_imagery_style',
       'brand_imagery_mode','brand_url','brand_keywords','brand_keywords_list',
       'brand_what_you_do','brand_tagline','brand_archetype','brand_vibe','brand_tone',
-      'website_layout','availability_days','practice_name','name'];
+      'website_layout','online_presence_type','social_instagram','social_facebook',
+      'social_linkedin','social_tiktok','social_youtube','social_other',
+      'availability_days','practice_name','name',
+      'ic_age_range','ic_gender','ic_life_stage','ic_income','ic_struggle','ic_tried',
+      'ic_trigger','ic_goal','ic_blocker','ic_channels'];
     fields.forEach(f => { if (data[f] !== undefined && data[f] !== null) wzData[f] = data[f]; });
     showScreen('wizard');
     renderWizardStep();
@@ -2479,7 +2496,7 @@ function applyProfileToUI() {
       !!data.brand_palette || !!data.brand_archetype,
       !!data.story_q1 || !!data.philosophy_statement,
       !!(data.services && data.services.length),
-      !!data.website_layout,
+      !!(data.online_presence_type || data.website_layout),
       !!(data.availability_days && Object.values(data.availability_days).some(d => d.enabled))
     ];
     const done = steps.filter(Boolean).length;
@@ -2491,7 +2508,7 @@ function applyProfileToUI() {
     const bar = document.getElementById('db-setup-bar');
     if (bar) bar.style.width = pct + '%';
     const icons = ['✓','✓','✓','✓','✓'];
-    const labels = ['Your Brand','Your Story','Your Services','Your Website','Availability'];
+    const labels = ['Your Brand','Your Story','Your Services','Online Presence','Availability'];
     steps.forEach((ok, i) => {
       const iconEl = document.getElementById('db-step-icon-' + (i+1));
       const labelEl = document.getElementById('db-step-label-' + (i+1));
@@ -2512,7 +2529,7 @@ function applyProfileToUI() {
     const sbSteps = [
       !!data.brand_palette || !!data.brand_archetype || !!data.brand_what_you_do,
       !!data.story_q1 || !!(PROFILE && PROFILE.name),
-      !!data.website_layout,
+      !!(data.online_presence_type || data.website_layout),
       !!(data.services && data.services.length),
       !!(data.availability_days && Object.values(data.availability_days).some(d => d.enabled))
     ];
@@ -2731,7 +2748,7 @@ const WIZARD_STEPS = [
   { title: 'Your Niche',               subtitle: 'The transformation you create and who it\'s for' },
   { title: 'Your Services',            subtitle: 'What do you offer? You can edit these any time' },
   { title: 'Your Brand',               subtitle: 'How your business looks and feels to the world' },
-  { title: 'Your Website',             subtitle: 'Built from your answers — nothing generic' },
+  { title: 'Your Online Presence',     subtitle: 'Website, social media, or both — your choice' },
   { title: 'Your Availability',        subtitle: 'When are you open for bookings?' }
 ];
 
@@ -4379,20 +4396,38 @@ async function saveWizardProgress() {
     localStorage.setItem('plenusos_wz_' + currentUser.uid, JSON.stringify({ step: wzStep, data: wzData }));
   } catch(e) {
     showToast('⚠️ Could not save locally: ' + e.message);
-    return;
   }
 
-  // SECONDARY: Supabase — only safe columns, errors non-fatal
+  // SECONDARY: Supabase — save ALL wizard fields so progress survives localStorage clear
   if (!sb) return;
   try {
-    const { error } = await sb.from('practitioner_profiles').upsert({
+    const payload = {
       id:              currentUser.uid,
       email:           currentUser.email,
       wizard_complete: false,
       wizard_step:     wzStep,
       updated_at:      new Date().toISOString()
-    }, { onConflict: 'id' });
-    if (error) console.warn('Supabase step save (non-critical):', error.message);
+    };
+    // Copy all wizard data fields into payload
+    const wdFields = ['assistant_name','assistant_gender','practice_types','practice_type_other',
+      'work_location_type','work_location_city','story_q','story_q1','story_q2','story_q3',
+      'story_q4','story_q5','story_q6','story_q7','story_q8','story_q9','about_draft',
+      'accreditations','accreditations_other','philosophy_q','philosophy_q1','philosophy_q2',
+      'philosophy_q3','philosophy_q4','philosophy_q5','philosophy_statement',
+      'ideal_client_q','ideal_client_q1','ideal_client_q2','ideal_client_q3','ideal_client_q4',
+      'client_archetypes','client_avatars','niche_q','niche_q1','niche_q2','niche_q3',
+      'niche_q4','niche_statement','niche_provisional','services','brand_feel','brand_ethics',
+      'brand_palette','brand_custom_swatches','brand_fonts','brand_imagery_style',
+      'brand_imagery_mode','brand_url','brand_keywords','brand_keywords_list',
+      'brand_what_you_do','brand_tagline','brand_archetype','brand_vibe','brand_tone',
+      'website_layout','online_presence_type','social_instagram','social_facebook',
+      'social_linkedin','social_tiktok','social_youtube','social_other',
+      'availability_days','practice_name','name',
+      'ic_age_range','ic_gender','ic_life_stage','ic_income','ic_struggle','ic_tried',
+      'ic_trigger','ic_goal','ic_blocker','ic_channels'];
+    wdFields.forEach(f => { if (wzData[f] !== undefined && wzData[f] !== null) payload[f] = wzData[f]; });
+    const { error } = await sb.from('practitioner_profiles').upsert(payload, { onConflict: 'id' });
+    if (error) console.warn('Supabase wizard save (non-critical):', error.message);
   } catch(e) {
     console.warn('Supabase save exception (non-critical):', e);
   }
@@ -4486,7 +4521,7 @@ function getWizardStepHTML(step) {
         ${[
           ['🪪','Your Profile','Who you are, what you do, and who you help — clearly expressed.'],
           ['🎨','Your Brand Identity','Colours, feel, tone, and imagery that are unmistakably you.'],
-          ['🌐','Your Website','A full website built from your answers. No templates, no guesswork.'],
+          ['🌐','Your Online Presence','Website, social media links, or both — built from your answers.'],
           ['🤝','Your AI Assistant','A personal assistant who knows your business and helps you grow it.'],
         ].map(([icon,title,desc]) => `
           <div style="background:#F9F8FF;border:1.5px solid #EDE9FE;border-radius:12px;padding:14px 12px;">
@@ -4520,7 +4555,7 @@ function getWizardStepHTML(step) {
             ['👤','About You','Your story, philosophy, ideal client, and niche'],
             ['🏥','Your Business','Your type, services, location, and availability'],
             ['🎨','Your Brand','Visual identity, tone, colours, and imagery'],
-            ['🌐','Your Website','Layout, style, and first impressions'],
+            ['🌐','Your Online Presence','Website, social media, or both'],
           ].map(([icon,phase,desc],i) => `
             <div style="display:flex;align-items:center;gap:12px;">
               <div style="width:28px;height:28px;border-radius:50%;background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${i+1}</div>
@@ -4532,7 +4567,7 @@ function getWizardStepHTML(step) {
     // ── STEP 1 · MEET YOUR ASSISTANT ──────────────────────────────
     case 1: return `
       <p style="font-size:14px;color:var(--grey-600);margin-bottom:20px;line-height:1.7;">
-        Your assistant is with you throughout PlenusOS — answering questions, generating content, and helping you present your practice at its best. Start by choosing who they are.
+        Your assistant is with you throughout PlenusOS — answering questions, generating content, and helping you present your business at its best. Start by choosing who they are.
       </p>
       <div style="margin-bottom:20px;">
         <div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:10px;">Choose your assistant's gender</div>
@@ -4569,7 +4604,7 @@ function getWizardStepHTML(step) {
         { label: 'Recovery & Mental Health', types: ['Addiction Recovery','Alcohol Recovery','Drug Recovery','Eating Disorder Support','Trauma Recovery','Anxiety & Depression Support','Grief Counselling'] },
         { label: "Women's Health", types: ["Fertility & IVF Support","Pregnancy & Postnatal","Menopause Support","PCOS & Hormonal Health","Endometriosis Support","Women's Wellbeing"] },
         { label: 'Movement & Body', types: ['Personal Training','Sports Nutrition','Sports Therapy','Massage Therapy','Sports Massage','Yoga','Pilates','Dance Therapy','Somatic Therapy','Breathwork'] },
-        { label: 'Holistic & Integrative', types: ['Ayurveda','Traditional Chinese Medicine','Energy Healing','Reiki','Reflexology','Aromatherapy','Crystal Therapy','Sound Healing','Kinesiology'] },
+        { label: 'Holistic & Integrative', types: ['Acupuncture','Ayurveda','Traditional Chinese Medicine','Reiki','Energy Healing','Reflexology','Aromatherapy','Crystal Therapy','Sound Healing','Kinesiology','Shiatsu','Indian Head Massage','Hot Stone Therapy','Cupping','Moxibustion'] },
         { label: 'Life & Business', types: ['Life Coaching','Health Coaching','Wellness Coaching','Executive Coaching','Business Coaching','Mindset Coaching','NLP Practitioner'] }
       ];
       const selected = wzData.practice_types || [];
@@ -4845,8 +4880,8 @@ function getWizardStepHTML(step) {
         { key:'under20k',  label:'Under £20k',   desc:'Part-time or supplementing existing income' },
         { key:'20to30k',   label:'£20–30k',      desc:'Full-time, modest income' },
         { key:'30to50k',   label:'£30–50k',      desc:'Solid full-time professional income' },
-        { key:'50to80k',   label:'£50–80k',      desc:'Growing and high-performing practice' },
-        { key:'80to100k',  label:'£80–100k',     desc:'High-earning established practice' },
+        { key:'50to80k',   label:'£50–80k',      desc:'Growing and high-performing business' },
+        { key:'80to100k',  label:'£80–100k',     desc:'High-earning established business' },
         { key:'over100k',  label:'£100k+',       desc:'Scaling, multi-stream or premium' },
         { key:'notsure',   label:'Not sure yet', desc:'Just exploring what is possible' }
       ];
@@ -4857,7 +4892,7 @@ function getWizardStepHTML(step) {
         { key:'5-packages', label:'5 clients on packages',   desc:'Structured programme cohort' },
         { key:'8-packages', label:'8 clients on packages',   desc:'Larger ongoing programme intake' },
         { key:'3to5-1to1',  label:'3–5 weekly 1:1 sessions', desc:'Regular ongoing appointments' },
-        { key:'5to8-1to1',  label:'5–8 weekly 1:1 sessions', desc:'Steady full practice' },
+        { key:'5to8-1to1',  label:'5–8 weekly 1:1 sessions', desc:'Steady full client base' },
         { key:'10to15-1to1',label:'10–15 weekly sessions',   desc:'High-volume 1:1' },
         { key:'15plus-1to1',label:'15+ weekly sessions',     desc:'Maximum capacity' }
       ];
@@ -4990,94 +5025,122 @@ function getWizardStepHTML(step) {
 
     // ── STEP 9 · YOUR IDEAL CLIENT ─────────────────────────────────
     case 9: {
-      const icPhase = wzData.ideal_client_phase || 1;
-      if (icPhase === 1) {
-        const icQ = wzData.ideal_client_q || 1;
-        const icQuestions = [
-          { id:'ideal_client_q1', q:'Who do you find yourself thinking about most — the clients you most want to help?', hint:'Think about age, gender, life stage, situation. e.g. "Women in their 40s dealing with burnout and hormonal changes who have tried everything and are exhausted."' },
-          { id:'ideal_client_q2', q:'Who do you help best — and what do your best outcomes have in common?', hint:'Think about the clients where your work really landed. What were they like? What were they ready to do? What made them different from harder clients?' },
-          { id:'ideal_client_q3', q:'Is there a specific group whose situation you understand at a deeper level — from experience or specialism?', hint:'This could be personal (lived experience), professional (a pattern you see repeatedly), or both. For example: 10 years working with postnatal women, understanding the mental load, identity shift, and physical recovery.' },
-          { id:'ideal_client_q4', q:'If you could fill your business entirely with one type of client, who would that be and why?', hint:'Dream freely here — no wrong answer. Who would energise you? Who gets the best results? Who do you feel you were made to work with?' }
-        ];
-        const icCurrent = icQuestions[icQ - 1];
-        return `
-          <div style="margin-bottom:16px;">
-            <div style="background:#F0FDF4;border:1.5px solid #6EE7B7;border-radius:10px;padding:12px 14px;margin-bottom:14px;">
-            <div style="font-size:12px;font-weight:700;color:#065F46;margin-bottom:4px;">💡 Why this matters</div>
-            <div style="font-size:12px;color:#047857;line-height:1.6;">Knowing exactly who you help lets your website, messaging, and services speak directly to the right person. The more specific you are, the more powerfully you attract the clients who are right for you.</div>
-          </div>
-            <div style="display:flex;gap:6px;margin-bottom:16px;">
-              ${icQuestions.map((qu, i) => {
-                const n = i + 1;
-                const done = !!wzData[qu.id];
-                const active = n === icQ;
-                return `<div onclick="goIdealClientQ(${n})" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;
-                  border:2px solid ${active ? 'var(--violet)' : done ? 'var(--violet)' : 'var(--grey-200)'};
-                  background:${active ? 'var(--violet)' : done ? '#F5F3FF' : '#fff'};
-                  color:${active ? '#fff' : done ? 'var(--violet)' : 'var(--grey-400)'};">${done && !active ? '✓' : n}</div>`;
-              }).join('')}
-            </div>
-            <div style="background:#F5F3FF;border-left:3px solid var(--violet);padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:14px;">
-              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--violet);margin-bottom:4px;">${assistantName} asks</div>
-              <div style="font-size:15px;font-weight:600;color:var(--charcoal);line-height:1.5;">${icCurrent.q}</div>
-              <div style="font-size:12px;color:var(--grey-500);margin-top:4px;line-height:1.5;">${icCurrent.hint}</div>
-            </div>
-            <textarea id="wz-ic-current" class="wz-input" style="min-height:110px;"
-              oninput="debounceAutosave()"
-              placeholder="Your answer…">${wzData[icCurrent.id] || ''}</textarea>
-            ${getInspirationHTML(icCurrent.id)}
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-              <div style="display:flex;gap:8px;">
-                ${icQ > 1 ? `<button class="btn btn-secondary" onclick="goIdealClientQ(${icQ-1})" style="padding:8px 14px;font-size:12px;">← Previous</button>` : ''}
-                ${icQ < 4 ? `<button class="btn btn-primary" onclick="saveIdealClientQAndNext(${icQ})" style="padding:8px 14px;font-size:12px;">Next question →</button>` : ''}
-              </div>
-              ${icQ === 4 ? `<button class="btn btn-primary" onclick="saveIdealClientQAndNext(4)" style="padding:8px 14px;font-size:12px;">Continue to archetypes →</button>` : ''}
-            </div>
-          </div>`;
+      function icChips(field, options) {
+        const saved = wzData[field] || [];
+        const arr = Array.isArray(saved) ? saved : [saved];
+        return options.map(o => {
+          const sel = arr.includes(o);
+          return `<button type="button" onclick="icToggle('${field}','${o}',this)"
+            style="padding:5px 11px;border-radius:20px;border:1.5px solid ${sel?'var(--violet)':'var(--grey-200)'};background:${sel?'#F5F3FF':'#fff'};color:${sel?'var(--violet)':'var(--grey-600)'};font-size:12px;font-weight:${sel?'700':'500'};cursor:pointer;transition:all 0.15s;margin:3px 3px 3px 0;">${o}</button>`;
+        }).join('');
       }
-      const archetypes = [
-        { key:'exhausted_achiever',   label:'The Exhausted High Achiever',  desc:'Driven, capable, running on empty. Knows something has to change.' },
-        { key:'reluctant_changer',    label:'The Reluctant Changer',        desc:'Referred or nudged by someone else. Sceptical but open.' },
-        { key:'researcher',           label:'The Researcher',               desc:'Has read everything. Comes to you with questions and expectations.' },
-        { key:'emergency_fixer',      label:'The Emergency Fixer',          desc:'A health event has made this urgent. Ready to act now.' },
-        { key:'sceptic',              label:'The Sceptic',                  desc:'Unconvinced by holistic approaches. Needs evidence and logic.' },
-        { key:'committed_transformer',label:'The Committed Transformer',    desc:'All in. Motivated, engaged, follows through. Your favourite client.' },
-        { key:'quietly_struggling',   label:'The Quietly Struggling',       desc:'Coping on the outside, exhausted on the inside. Hard to reach.' },
-        { key:'returning_client',     label:'The Returning Client',         desc:'Worked with you before. Ready for the next level.' }
-      ];
-      const selected = wzData.client_archetypes || [];
-      const activeAvatar = wzData.active_avatar || 0;
-      const avatars = wzData.client_avatars || [{ name:'', age_range:'', primary_goal:'', primary_pain:'', main_objection:'', buying_trigger:'' }];
       return `
-        <div style="margin-bottom:20px;">
-          <div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:10px;">Which of these feel most like your clients? <span style="color:var(--grey-400);font-weight:400;">(select all that apply)</span></div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            ${archetypes.map(a => {
-              const sel = selected.includes(a.key);
-              return `
-              <label style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid ${sel ? 'var(--violet)' : 'var(--grey-200)'};background:${sel ? '#F5F3FF' : '#fff'};border-radius:10px;cursor:pointer;transition:all 0.15s;">
-                <input type="checkbox" data-archetype="${a.key}" class="wz-archetype" ${sel ? 'checked' : ''} style="width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--violet);">
-                <div>
-                  <div style="font-weight:700;font-size:13px;">${a.label}</div>
-                  <div style="font-size:11px;color:var(--grey-500);margin-top:2px;">${a.desc}</div>
-                </div>
-              </label>`;
-            }).join('')}
+        <div style="background:#F0FDF4;border:1.5px solid #6EE7B7;border-radius:10px;padding:10px 14px;margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:700;color:#065F46;margin-bottom:2px;">💡 Why this matters</div>
+          <div style="font-size:12px;color:#047857;line-height:1.5;">The more clearly you can picture your ideal client, the more your website, services, and messaging will speak directly to them — and the more powerfully they'll feel that you understand them.</div>
+        </div>
+
+        <!-- WHO ARE THEY -->
+        <div style="margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--violet);margin-bottom:10px;">👤 Who are they?</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>Give them a name <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(fictional — helps make them real)</span></label>
+            <input type="text" id="wz-ic-name" class="wz-input" placeholder="e.g. Sarah, James, Maria…" value="${wzData.ic_name||''}" oninput="wzData.ic_name=this.value;debounceAutosave();">
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>Age range</label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${icChips('ic_age_range',['Under 25','25–35','35–45','45–55','55–65','65+','Mixed ages'])}
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>Gender</label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${icChips('ic_gender',['All genders','Mostly women','Mostly men','Non-binary / gender-diverse'])}
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>Life stage <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(pick all that apply)</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${icChips('ic_life_stage',['Student','New parent','Parent of young children','Parent of teens','Empty nester','Working professional','Self-employed','Senior / retired','Carer','Going through a health crisis','Perimenopausal / menopausal','Post-divorce / life transition'])}
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Income / budget level</label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${icChips('ic_income',['Budget-conscious','Middle income','Comfortable / high earner','Affluent','Varies widely'])}
+            </div>
           </div>
         </div>
-        <div style="border-top:1px solid var(--grey-100);padding-top:16px;">
-          <div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:12px;">Build your ideal client avatar</div>
-          <div class="grid-2" style="gap:10px;">
-            <div class="form-group" style="margin-bottom:8px;"><label>Name <span style="color:var(--grey-400);font-weight:400;">(fictional)</span></label><input type="text" id="wz-av-name" class="wz-input" placeholder="e.g. Sarah" value="${avatars[0].name || ''}"></div>
-            <div class="form-group" style="margin-bottom:8px;"><label>Age range</label>
-              <select id="wz-av-age" class="wz-input">
-                ${['25–35','35–45','45–55','55+','Mixed ages'].map(a => `<option ${avatars[0].age_range===a?'selected':''}>${a}</option>`).join('')}
-              </select>
+
+        <!-- WHAT'S GOING ON FOR THEM -->
+        <div style="border-top:1px solid var(--grey-100);padding-top:16px;margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--violet);margin-bottom:10px;">😔 What's going on for them?</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>Their biggest struggle or symptom <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(in their own words)</span></label>
+            <input type="text" id="wz-ic-struggle" class="wz-input" placeholder='e.g. "I'm exhausted all the time no matter how much I sleep"' value="${wzData.ic_struggle||''}" oninput="wzData.ic_struggle=this.value;debounceAutosave();">
+          </div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>What have they already tried? <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(pick all that apply)</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${icChips('ic_tried',['Seen their GP','Prescribed medication','Seen other therapists','Changed their diet','Bought supplements','Read books / self-help','Tried online programmes','Done nothing yet','Alternative therapies'])}
             </div>
           </div>
-          <div class="form-group" style="margin-bottom:8px;"><label>Primary goal</label><input type="text" id="wz-av-goal" class="wz-input" placeholder="What do they most want to achieve?" value="${avatars[0].primary_goal || ''}"></div>
-          <div class="form-group" style="margin-bottom:8px;"><label>Primary pain</label><input type="text" id="wz-av-pain" class="wz-input" placeholder="What keeps them stuck or suffering right now?" value="${avatars[0].primary_pain || ''}"></div>
-          <div class="form-group" style="margin-bottom:0;"><label>Main objection</label><input type="text" id="wz-av-objection" class="wz-input" placeholder="The reason they hesitate to book" value="${avatars[0].main_objection || ''}"></div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>What made them finally reach out?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${icChips('ic_trigger',['Health scare or diagnosis','Fed up after years of struggling','Friend or family recommendation','Found you on social media','Google search','GP suggested it','A key life event (birth, menopause, divorce, bereavement)','Work stress reached a tipping point'])}
+            </div>
+          </div>
+        </div>
+
+        <!-- WHAT DO THEY WANT -->
+        <div style="border-top:1px solid var(--grey-100);padding-top:16px;margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--violet);margin-bottom:10px;">✨ What do they want?</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>Their number one goal <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(what success looks like to them)</span></label>
+            <input type="text" id="wz-ic-goal" class="wz-input" placeholder='e.g. "To have enough energy to be present with my kids after work"' value="${wzData.ic_goal||''}" oninput="wzData.ic_goal=this.value;debounceAutosave();">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>What's holding them back from booking? <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(pick all that apply)</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${icChips('ic_blocker',['Cost / budget','Not sure it will work for them','Had bad experiences before','Don\'t have time','Partner / family scepticism','Fear of making changes','Don\'t know where to start','Embarrassment or shame','Think it\'s not serious enough to get help'])}
+            </div>
+          </div>
+        </div>
+
+        <!-- WHERE TO FIND THEM -->
+        <div style="border-top:1px solid var(--grey-100);padding-top:16px;margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--violet);margin-bottom:10px;">📍 Where do they hang out?</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>Online <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(pick all that apply)</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${icChips('ic_channels',['Instagram','Facebook groups','YouTube','Pinterest','TikTok','LinkedIn','Podcasts','Google search','Reddit / forums','Email newsletters'])}
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Offline <span style="color:var(--grey-400);font-size:11px;font-weight:400;">(pick all that apply)</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+              ${icChips('ic_offline',['Word of mouth','GP or NHS referral','Yoga / gym / fitness community','Local community / events','Schools or parent groups','Workplace wellness','Holistic health fairs'])}
+            </div>
+          </div>
+        </div>
+
+        <!-- AVATAR PREVIEW CARD -->
+        <div style="border-top:1px solid var(--grey-100);padding-top:16px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--grey-400);margin-bottom:10px;">Your ideal client at a glance</div>
+          <div style="background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1px solid #DDD6FE;border-radius:12px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+              <div style="width:44px;height:44px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;">👤</div>
+              <div>
+                <div style="font-weight:800;font-size:15px;color:var(--charcoal);">${wzData.ic_name || 'Your ideal client'}</div>
+                <div style="font-size:12px;color:var(--grey-500);">${[wzData.ic_age_range,wzData.ic_gender].filter(x=>x&&!Array.isArray(x)).join(' · ') || (wzData.ic_age_range&&wzData.ic_age_range[0]) || 'Age & gender not yet set'}</div>
+              </div>
+            </div>
+            ${wzData.ic_struggle ? `<div style="font-size:12px;color:var(--grey-600);margin-bottom:6px;"><strong style="color:var(--charcoal);">Struggling with:</strong> ${wzData.ic_struggle}</div>` : ''}
+            ${wzData.ic_goal ? `<div style="font-size:12px;color:var(--grey-600);"><strong style="color:var(--charcoal);">Wants:</strong> ${wzData.ic_goal}</div>` : ''}
+            ${!wzData.ic_struggle && !wzData.ic_goal ? '<div style="font-size:12px;color:var(--grey-400);font-style:italic;">Fill in the fields above to build your avatar card</div>' : ''}
+          </div>
         </div>`;
     }
 
@@ -5459,45 +5522,75 @@ function getWizardStepHTML(step) {
         }
       ];
       const selLayout = wzData.website_layout || '';
+      const presType = wzData.online_presence_type || '';
+      const showWebsite = presType === 'website' || presType === 'both';
       return `
         <div style="margin-bottom:14px;">
-          <div style="font-size:13px;color:var(--grey-500);line-height:1.6;margin-bottom:16px;">
-            Your content is already captured. Choose a layout style — this sets the visual feel of your website. You can change it later.
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-            ${layoutOptions.map(opt => {
-              const sel = selLayout === opt.key;
-              return `
-              <div onclick="wzData.website_layout='${opt.key}';document.querySelectorAll('[data-layout]').forEach(el=>{var s=el.dataset.layout===wzData.website_layout;el.style.border=s?'2px solid var(--violet)':'1.5px solid var(--grey-200)';el.style.background=s?'#F5F3FF':'#fff';});" data-layout="${opt.key}"
-                style="padding:12px;border:${sel?'2px solid var(--violet)':'1.5px solid var(--grey-200)'};background:${sel?'#F5F3FF':'#fff'};border-radius:12px;cursor:pointer;transition:all 0.2s;">
-                ${opt.preview}
-                <div style="margin-top:8px;">
-                  <div style="font-size:12px;font-weight:700;color:var(--charcoal);">${opt.label}</div>
-                  <div style="font-size:11px;color:var(--grey-500);margin-top:2px;line-height:1.3;">${opt.desc}</div>
-                </div>
+          <p style="font-size:13px;color:var(--grey-500);margin-bottom:16px;line-height:1.6;">How do you want clients to find and connect with you? You can always add a website later.</p>
+
+          <!-- Presence type selector -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;">
+            ${[
+              { key:'social', icon:'📱', label:'Social media only', desc:'Instagram, Facebook, etc.' },
+              { key:'website', icon:'🌐', label:'Website only', desc:'Your own site' },
+              { key:'both', icon:'✨', label:'Both', desc:'Website + social media' }
+            ].map(opt => {
+              const sel = presType === opt.key;
+              return `<div onclick="wzData.online_presence_type='${opt.key}';document.querySelectorAll('[data-ptype]').forEach(el=>{var s=el.dataset.ptype===wzData.online_presence_type;el.style.border=s?'2px solid var(--violet)':'1.5px solid var(--grey-200)';el.style.background=s?'#F5F3FF':'#fff';});document.getElementById('wz-website-section').style.display=(wzData.online_presence_type==='website'||wzData.online_presence_type==='both')?'block':'none';" data-ptype="${opt.key}"
+                style="padding:12px 8px;border:${sel?'2px solid var(--violet)':'1.5px solid var(--grey-200)'};background:${sel?'#F5F3FF':'#fff'};border-radius:12px;cursor:pointer;transition:all 0.2s;text-align:center;">
+                <div style="font-size:24px;margin-bottom:4px;">${opt.icon}</div>
+                <div style="font-size:11px;font-weight:700;color:var(--charcoal);">${opt.label}</div>
+                <div style="font-size:10px;color:var(--grey-400);margin-top:2px;">${opt.desc}</div>
               </div>`;
             }).join('')}
           </div>
-          <div style="border-top:1px solid var(--grey-100);padding-top:16px;">
-            <div style="font-size:12px;font-weight:700;color:var(--charcoal);margin-bottom:10px;">Content ready to go</div>
-            <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
+
+          <!-- Social media links — always shown -->
+          <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--grey-400);margin-bottom:10px;">Your social media profiles <span style="font-weight:400;font-style:italic;">(optional)</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
               ${[
-                { label:'Story & About', ready: !!wzData.story_q1 },
-                { label:'Your philosophy', ready: !!wzData.philosophy_q1 },
-                { label:'Services', ready: !!(wzData.services && wzData.services.length) },
-                { label:'Brand & colours', ready: !!wzData.brand_palette }
-              ].map(item => `
-                <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:${item.ready?'#059669':'var(--grey-400)'};">
-                  <span style="font-size:14px;">${item.ready?'✅':'⬜'}</span> ${item.label}${item.ready?' — ready':' — not yet filled in'}
+                { key:'social_instagram', icon:'📸', label:'Instagram', ph:'https://instagram.com/yourname' },
+                { key:'social_facebook', icon:'👥', label:'Facebook', ph:'https://facebook.com/yourpage' },
+                { key:'social_linkedin', icon:'💼', label:'LinkedIn', ph:'https://linkedin.com/in/yourname' },
+                { key:'social_tiktok', icon:'🎵', label:'TikTok', ph:'https://tiktok.com/@yourname' },
+                { key:'social_youtube', icon:'▶️', label:'YouTube', ph:'https://youtube.com/@yourchannel' },
+                { key:'social_other', icon:'🔗', label:'Other link', ph:'https://...' }
+              ].map(s => `
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:16px;flex-shrink:0;">${s.icon}</span>
+                  <span style="font-size:12px;font-weight:600;color:var(--grey-600);width:70px;flex-shrink:0;">${s.label}</span>
+                  <input type="url" class="wz-input" style="flex:1;padding:7px 10px;font-size:12px;" placeholder="${s.ph}" value="${wzData[s.key]||''}" oninput="wzData['${s.key}']=this.value;debounceAutosave();">
                 </div>`).join('')}
             </div>
           </div>
-          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px 16px;margin-bottom:10px;">
-            <div style="font-size:12px;font-weight:700;color:#1D4ED8;margin-bottom:5px;">🌐 Do you have a domain name yet?</div>
-            <div style="font-size:11.5px;color:#2563EB;line-height:1.5;margin-bottom:10px;">Your website needs an address — like <em>yourname.com</em> or <em>yourpractice.co.uk</em>. Without one, your site can't go live.</div>
-            <a href="https://www.namecheap.com/domains/registration/results/?domain=yourpractice" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #BFDBFE;border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:700;color:#1D4ED8;text-decoration:none;">🏷️ Search for a domain — from £5/yr →</a>
-            <div style="margin-top:6px;font-size:10px;color:#60A5FA;">Tip: .co.uk domains feel local and credible for UK practitioners</div>
+
+          <!-- Website section — shown if website or both -->
+          <div id="wz-website-section" style="display:${showWebsite?'block':'none'};">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--grey-400);margin-bottom:10px;">Website style</div>
+            <p style="font-size:12px;color:var(--grey-500);margin-bottom:12px;line-height:1.5;">Your content is already captured. Choose a layout — you can change it any time.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+              ${layoutOptions.map(opt => {
+                const sel = selLayout === opt.key;
+                return `
+                <div onclick="wzData.website_layout='${opt.key}';document.querySelectorAll('[data-layout]').forEach(el=>{var s=el.dataset.layout===wzData.website_layout;el.style.border=s?'2px solid var(--violet)':'1.5px solid var(--grey-200)';el.style.background=s?'#F5F3FF':'#fff';});" data-layout="${opt.key}"
+                  style="padding:12px;border:${sel?'2px solid var(--violet)':'1.5px solid var(--grey-200)'};background:${sel?'#F5F3FF':'#fff'};border-radius:12px;cursor:pointer;transition:all 0.2s;">
+                  ${opt.preview}
+                  <div style="margin-top:8px;">
+                    <div style="font-size:12px;font-weight:700;color:var(--charcoal);">${opt.label}</div>
+                    <div style="font-size:11px;color:var(--grey-500);margin-top:2px;line-height:1.3;">${opt.desc}</div>
+                  </div>
+                </div>`;
+              }).join('')}
+            </div>
+            <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:14px 16px;margin-bottom:10px;">
+              <div style="font-size:12px;font-weight:700;color:#1D4ED8;margin-bottom:5px;">🌐 Do you have a domain name yet?</div>
+              <div style="font-size:11.5px;color:#2563EB;line-height:1.5;margin-bottom:10px;">Your website needs an address — like <em>yourname.com</em> or <em>yourbusiness.co.uk</em>. Without one, your site can't go live.</div>
+              <a href="https://www.namecheap.com/domains/registration/results/?domain=yourbusiness" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #BFDBFE;border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:700;color:#1D4ED8;text-decoration:none;">🏷️ Search for a domain — from £5/yr →</a>
+              <div style="margin-top:6px;font-size:10px;color:#60A5FA;">Tip: .co.uk domains feel local and credible for UK practitioners</div>
+            </div>
           </div>
+
           <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px 16px;">
             <div style="font-size:12px;font-weight:700;color:#065F46;margin-bottom:5px;">📧 Professional email address</div>
             <div style="font-size:11.5px;color:#047857;line-height:1.5;margin-bottom:10px;">A <em>hello@yourbusiness.co.uk</em> address builds trust immediately. A Gmail or Hotmail can undermine confidence before a client even books.</div>
@@ -6153,7 +6246,7 @@ function getBrandPhaseContent(phase) {
                 { key:'warm-lifestyle', label:'Warm Lifestyle',           colours:['#FFF7ED','#FED7AA','#FB923C','#9A3412'], desc:'Cosy interiors, golden light. Relatable & aspirational.' },
                 { key:'real-people',    label:'Real People',              colours:['#FEF9C3','#FDE68A','#D97706','#92400E'], desc:'Authentic moments, natural settings. Builds trust.' },
                 { key:'clean-minimal',  label:'Clean & Minimal',          colours:['#FFFFFF','#F1F5F9','#94A3B8','#334155'], desc:'White space, calm palettes. Modern & clinical.' },
-                { key:'luxury-premium', label:'Luxury & Premium',         colours:['#1E0A3C','#4C1D95','#C084FC','#FDE68A'], desc:'Rich, refined, high-touch. Premium practices.' },
+                { key:'luxury-premium', label:'Luxury & Premium',         colours:['#1E0A3C','#4C1D95','#C084FC','#FDE68A'], desc:'Rich, refined, high-touch. Premium businesses.' },
                 { key:'coastal-fresh',  label:'Coastal & Fresh',          colours:['#F0F9FF','#BAE6FD','#0284C7','#164E63'], desc:'Airy, light, clean blues. Fresh & energising.' },
                 { key:'earthy-raw',     label:'Earthy & Textured',        colours:['#FEF3C7','#D4A373','#A0522D','#3D1C02'], desc:'Raw textures, terracotta, clay. Grounded & honest.' }
               ].map(img => {
@@ -6430,20 +6523,14 @@ function collectWizardStep(step) {
       break;
     }
     case 9: {
-      const icCurrentQ = wzData.ideal_client_q || 1;
-      const icVal = document.getElementById('wz-ic-current')?.value || '';
-      if (icVal) wzData['ideal_client_q' + icCurrentQ] = icVal;
-      wzData.client_archetypes = Array.from(document.querySelectorAll('.wz-archetype:checked')).map(el => el.dataset.archetype);
-      const avatars = wzData.client_avatars || [{}];
-      avatars[0] = {
-        ...avatars[0],
-        name:         g('wz-av-name'),
-        age_range:    g('wz-av-age'),
-        primary_goal: g('wz-av-goal'),
-        primary_pain: g('wz-av-pain'),
-        main_objection: g('wz-av-objection')
-      };
-      wzData.client_avatars = avatars;
+      // All ic_* fields are updated live via icToggle and oninput handlers
+      // Just grab the text inputs in case autosave hasn't fired
+      const icName = document.getElementById('wz-ic-name');
+      const icStruggle = document.getElementById('wz-ic-struggle');
+      const icGoal = document.getElementById('wz-ic-goal');
+      if (icName) wzData.ic_name = icName.value.trim();
+      if (icStruggle) wzData.ic_struggle = icStruggle.value.trim();
+      if (icGoal) wzData.ic_goal = icGoal.value.trim();
       break;
     }
     case 10: {
@@ -6471,8 +6558,12 @@ function collectWizardStep(step) {
       collectBrandPhase(wzData.brand_phase || 1);
       break;
     case 13:
-      // website_layout is set directly on wzData by onclick handlers
-      // wzData.website_layout already up to date
+      // online_presence_type and website_layout are set directly on wzData by onclick handlers
+      // Save social media URLs from inputs
+      ['social_instagram','social_facebook','social_linkedin','social_tiktok','social_youtube','social_other'].forEach(key => {
+        const inputs = document.querySelectorAll(`input[oninput*="${key}"]`);
+        if (inputs.length) wzData[key] = inputs[0].value.trim();
+      });
       break;
     case 14: {
       const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -6642,6 +6733,36 @@ function saveIdealClientQAndNext(q) {
     wzData.ideal_client_phase = 2;
     renderWizardStep();
   }
+}
+
+function icToggle(field, value, btn) {
+  if (!wzData[field] || !Array.isArray(wzData[field])) wzData[field] = [];
+  const arr = wzData[field];
+  const singleFields = ['ic_age_range','ic_gender','ic_income']; // single-select
+  if (singleFields.includes(field)) {
+    wzData[field] = arr.includes(value) ? [] : [value];
+  } else {
+    const idx = arr.indexOf(value);
+    if (idx >= 0) arr.splice(idx, 1);
+    else arr.push(value);
+  }
+  // Update button styles
+  const parent = btn.parentElement;
+  if (parent) {
+    parent.querySelectorAll('button').forEach(b => {
+      const bVal = b.textContent.trim();
+      const sel = wzData[field] && wzData[field].includes(bVal);
+      b.style.border = sel ? '1.5px solid var(--violet)' : '1.5px solid var(--grey-200)';
+      b.style.background = sel ? '#F5F3FF' : '#fff';
+      b.style.color = sel ? 'var(--violet)' : 'var(--grey-600)';
+      b.style.fontWeight = sel ? '700' : '500';
+    });
+  }
+  // Refresh avatar preview
+  const nameEl = document.getElementById('wz-ic-name');
+  const struggleEl = document.getElementById('wz-ic-struggle');
+  const goalEl = document.getElementById('wz-ic-goal');
+  debounceAutosave();
 }
 
 function savePhilosophyAndNext(q) {
@@ -6913,7 +7034,7 @@ function updateSidebarSteps() {
   const sbSteps = [
     !!wzData.brand_palette || !!wzData.brand_archetype || !!wzData.brand_what_you_do,
     !!(PROFILE && PROFILE.name) || !!wzData.story_q1,
-    !!wzData.website_layout,
+    !!(wzData.online_presence_type || wzData.website_layout),
     !!(wzData.services && wzData.services.length),
     !!(wzData.availability_days && Object.values(wzData.availability_days).some(d => d.enabled))
   ];
@@ -6938,7 +7059,7 @@ function validateWizardStep(step) {
   switch (step) {
     case 2:
       if (!wzData.practice_types || wzData.practice_types.length === 0)
-        return "Step 2 — Practice Type: please select at least one type of practice from the list.";
+        return "Step 2 — What You Do: please select at least one type from the list.";
       break;
     case 3:
       if (!wzData.work_location_type)
@@ -6952,7 +7073,7 @@ function validateWizardStep(step) {
       if (!wzData.journey_challenges || wzData.journey_challenges.length === 0)
         return "Step 4 — Your Journey: please select at least one challenge you are currently facing.";
       if (!wzData.journey_intention || !wzData.journey_intention.trim())
-        return "Step 4 — Your Journey: please answer 'What is your intention for your practice?' before continuing.";
+        return "Step 4 — Your Journey: please answer 'What is your intention for your business?' before continuing.";
       break;
     case 5: {
       const storyQs = [
@@ -6976,7 +7097,7 @@ function validateWizardStep(step) {
     }
     case 7:
       if (!wzData.vision_1yr || !wzData.vision_1yr.trim())
-        return "Step 7 — Vision: please answer 'Where do you want your practice to be in one year?' before continuing.";
+        return "Step 7 — Vision: please answer 'Where do you want your business to be in one year?' before continuing.";
       break;
     case 8: {
       const philQs = ['What do you believe about the people you help?','What do you believe about the change your work makes possible?','What does working with you feel like?','What do you want someone to feel within 30 seconds of landing on your website?','What would you never want to be known for?'];
@@ -7108,7 +7229,7 @@ async function completeWizard() {
   CONFIG.paypalClientId       = wzData.paypal_client_id       || '';
   applyProfileToUI();
   showScreen(null);
-  showToast('🎉 Welcome to PlenusOS! Your practice is live.');
+  showToast('🎉 Welcome to PlenusOS! Your business is live.');
   logAudit('wizard_complete', null, null, null);
   loadClients();
 }
@@ -7422,15 +7543,15 @@ const ROB_TIPS = {
     { q: "What if I get stuck?", a: "No rush — take your time. Each section has helpful hints, and you can always skip optional fields and return to them later." }
   ],
   brand: [
-    { q: "How do I choose the right colour palette?", a: "Think about how you want clients to feel when they visit your practice. Wellness tones feel calm and natural, Classic tones feel professional and established, Bold tones feel energetic and modern." },
-    { q: "What's a brand archetype?", a: "It's the personality of your practice. Are you more of a wise Guide, an empowering Champion, or a nurturing Caregiver? Pick what resonates most with how your clients describe you." },
-    { q: "What does 'vibe' mean here?", a: "Your vibe is the energy and feeling of your practice. Is it calm and restorative, warm and personal, or clinical and precise? Choose the one that matches how clients feel when they work with you." },
-    { q: "Do I need to fill everything in?", a: "The essentials (practice name and colour palette) are most important. The rest helps your AI assistant give better suggestions, but you can skip and come back." }
+    { q: "How do I choose the right colour palette?", a: "Think about how you want clients to feel when they visit your business. Wellness tones feel calm and natural, Classic tones feel professional and established, Bold tones feel energetic and modern." },
+    { q: "What's a brand archetype?", a: "It's the personality of your business. Are you more of a wise Guide, an empowering Champion, or a nurturing Caregiver? Pick what resonates most with how your clients describe you." },
+    { q: "What does 'vibe' mean here?", a: "Your vibe is the energy and feeling of your business. Is it calm and restorative, warm and personal, or clinical and precise? Choose the one that matches how clients feel when they work with you." },
+    { q: "Do I need to fill everything in?", a: "The essentials (business name and colour palette) are most important. The rest helps your AI assistant give better suggestions, but you can skip and come back." }
   ],
   story: [
     { q: "I'm not sure what to write about my philosophy.", a: "Try finishing this sentence: 'I believe that real health means...' Your philosophy is simply what drives your work — it doesn't have to be perfect, just honest." },
     { q: "How do I describe my ideal client?", a: "Think of your best current client or the person you most love working with. What are they struggling with? What do they want? Where are they in their health journey?" },
-    { q: "What's the 'story behind my practice' for?", a: "It helps clients connect with you as a person, not just a practitioner. Even one or two sentences about your 'why' makes a real difference to how people feel about booking with you." }
+    { q: "What's the 'story behind my business' for?", a: "It helps clients connect with you as a person, not just a practitioner. Even one or two sentences about your 'why' makes a real difference to how people feel about booking with you." }
   ]
 };
 
@@ -7478,7 +7599,7 @@ function renderRobPanel() {
     </div>
 
     <div style="background:#f5f3ff;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#4b5563;line-height:1.5;">
-      👋 Hi! I'm Rob. Ask me anything about setting up your practice, or tap a question below for instant guidance.
+      👋 Hi! I'm Rob. Ask me anything about setting up your business, or tap a question below for instant guidance.
     </div>
 
     <div style="margin-bottom:16px;">
@@ -7515,14 +7636,14 @@ function showRobAnswer(idx) {
 const ROB_SMART_ANSWERS = [
   { keys: ['save','saving','lost','losing','progress'], a: "Your work saves automatically every time you move between steps. If you close the browser and come back, just log in again and you'll land right back where you were." },
   { keys: ['password','login','sign in','access','locked out'], a: "If you can't log in, use the 'Forgot password?' link on the login screen. A reset link will arrive in your inbox — click it and you can set a new password straight away." },
-  { keys: ['colour','color','palette','brand colour','brand color'], a: "Your colour palette sets the whole visual tone of your practice. Wellness palettes feel calm and natural, Classic palettes feel established and professional, Bold palettes feel energetic and modern. You can always change it later." },
-  { keys: ['archetype','pioneer','guide','champion','nurturer','authority','artisan'], a: "Your archetype is the personality of your practice. The Guide builds trust through wisdom, the Champion empowers clients, the Nurturer creates deep safety, the Authority leads with expertise. Pick what your best clients would say about you." },
+  { keys: ['colour','color','palette','brand colour','brand color'], a: "Your colour palette sets the whole visual tone of your business. Wellness palettes feel calm and natural, Classic palettes feel established and professional, Bold palettes feel energetic and modern. You can always change it later." },
+  { keys: ['archetype','pioneer','guide','champion','nurturer','authority','artisan'], a: "Your archetype is the personality of your business. The Guide builds trust through wisdom, the Champion empowers clients, the Nurturer creates deep safety, the Authority leads with expertise. Pick what your best clients would say about you." },
   { keys: ['philosophy','belief','approach','method','methodology'], a: "Your philosophy is simply what drives your work. Try finishing: 'I believe real health means…' — even two sentences make a difference to how clients connect with you." },
   { keys: ['ideal client','perfect client','client','who do you help','target'], a: "Think of the client you love working with most. What are they struggling with? What do they want to feel? What have they already tried? Being specific here actually attracts MORE clients, not fewer." },
-  { keys: ['vibe','energy','feel','feeling','atmosphere'], a: "Your vibe is the energy clients feel when they work with you. Are you calm and restorative, warm and personal, or clinical and precise? Choose the one your best clients would use to describe your practice." },
+  { keys: ['vibe','energy','feel','feeling','atmosphere'], a: "Your vibe is the energy clients feel when they work with you. Are you calm and restorative, warm and personal, or clinical and precise? Choose the one your best clients would use to describe your business." },
   { keys: ['tagline','strapline','slogan','headline'], a: "A great tagline is short, specific, and says exactly who you help and how. For example: 'Helping busy women find balance from the inside out.' It doesn't need to be clever — just clear." },
-  { keys: ['name','practice name','business name'], a: "Your practice name can be your own name (e.g. 'Helen Bratton Nutrition') or something that describes the transformation you offer. Personal names build trust; descriptive names attract search traffic. Both work well." },
-  { keys: ['skip','optional','do i have to','must i','required'], a: "Only your practice name and email are required to get started. Everything else — tagline, imagery, personality — helps your AI assistant give better suggestions, but you can always skip and come back." },
+  { keys: ['name','business name'], a: "Your business name can be your own name (e.g. 'Helen Bratton Nutrition') or something that describes the transformation you offer. Personal names build trust; descriptive names attract search traffic. Both work well." },
+  { keys: ['skip','optional','do i have to','must i','required'], a: "Only your business name and email are required to get started. Everything else — tagline, imagery, personality — helps your AI assistant give better suggestions, but you can always skip and come back." },
   { keys: ['time','long','how long','finish'], a: "Most practitioners complete the full setup in 20–30 minutes. You can go at your own pace and come back at any time — your progress is always saved." }
 ];
 
@@ -7555,7 +7676,7 @@ function askRobQuestion() {
   if (best && bestScore > 0) {
     ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>' + best.a;
   } else {
-    ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>Great question! I don\'t have a specific answer for that yet, but here\'s my general advice: take your time with each section, answer as honestly as you can, and remember every field you fill in helps your AI assistant give you better, more personalised suggestions for your practice.';
+    ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>Great question! I don\'t have a specific answer for that yet, but here\'s my general advice: take your time with each section, answer as honestly as you can, and remember every field you fill in helps your AI assistant give you better, more personalised suggestions for your business.';
   }
   ans.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   input.value = '';
