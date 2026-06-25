@@ -186,6 +186,9 @@ textarea{resize:vertical;min-height:90px;}
 .wz-palette-opt.selected{border-color:var(--violet);}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Firebase Auth (compat SDK — works without bundler) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -1833,11 +1836,12 @@ textarea{resize:vertical;min-height:90px;}
 <script>
 // ============================================================
 // NUTRIFLOW v3 — Foundation Layer
-// Supabase auth + persistent profile + secure key handling
+// Firebase Auth + Supabase data + localStorage
 // ============================================================
 
-let sb = null;           // Supabase client (set after config loaded)
-let currentUser = null;  // Authenticated Supabase user
+let sb = null;           // Supabase client (data only — auth handled by Firebase)
+let fbAuth = null;       // Firebase Auth instance
+let currentUser = null;  // Authenticated user (Firebase user object)
 let PROFILE = {};        // Loaded from practitioner_profiles table
 let wzStep = 1;          // Wizard current step (1-based)
 let wzData = {};         // Wizard data being collected
@@ -1863,32 +1867,33 @@ const PAGE_TITLES = {
 // INITIALISATION
 // ============================================================
 
-async function init(directUrl, directKey) {
+async function init() {
   fixDates();
-  // NOTE: Do NOT clear sb-* localStorage keys here. Supabase manages its own session
-  // storage and clearing it forces users to log in on every page visit, which also
-  // breaks "save and come back later". Password reset is handled via the
-  // PASSWORD_RECOVERY event in onAuthStateChange below.
-  const sbUrl = 'https://klnmqsfpxlhmzymwunci.supabase.co';
-  const sbKey  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtsbm1xc2ZweGxobXp5bXd1bmNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjM1NzQsImV4cCI6MjA5Nzc5OTU3NH0.uaM5wesAyrqP1KAtKwMwzH8E2KH7Y85fQ2sZQqPww8I';
 
+  // Initialise Firebase Auth
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDLxRyBNO0E2Yc4j2LukUtk2jJs57vbJIs",
+    authDomain:        "plenusos.firebaseapp.com",
+    projectId:         "plenusos",
+    storageBucket:     "plenusos.firebasestorage.app",
+    messagingSenderId: "697981566089",
+    appId:             "1:697981566089:web:4f95ef4c701775c814da58"
+  };
   try {
-    sb = window.supabase.createClient(sbUrl, sbKey);
+    const fbApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+    fbAuth = firebase.auth(fbApp);
 
-    sb.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        // User clicked a password reset link — show the set-new-password overlay
-        currentUser = session ? session.user : null;
-        document.getElementById('overlay-reset-password').style.display = 'flex';
-        // Hide all other screens
-        document.getElementById('overlay-auth').style.display = 'none';
-        document.getElementById('overlay-wizard').style.display = 'none';
-        document.getElementById('overlay-supabase').style.display = 'none';
-        if (document.getElementById('app')) document.getElementById('app').style.display = 'none';
-        return;
-      }
-      if (session) {
-        currentUser = session.user;
+    // Also init Supabase for data (profile, clients etc.) — auth handled by Firebase
+    try {
+      const sbUrl = 'https://klnmqsfpxlhmzymwunci.supabase.co';
+      const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtsbm1xc2ZweGxobXp5bXd1bmNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjM1NzQsImV4cCI6MjA5Nzc5OTU3NH0.uaM5wesAyrqP1KAtKwMwzH8E2KH7Y85fQ2sZQqPww8I';
+      sb = window.supabase.createClient(sbUrl, sbKey);
+    } catch(e) { sb = null; } // Non-fatal — localStorage is primary
+
+    // Firebase auth state listener — instant, no cold start
+    fbAuth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUser = user;
         await loadProfile();
       } else {
         currentUser = null;
@@ -1897,30 +1902,25 @@ async function init(directUrl, directKey) {
       }
     });
 
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) showScreen('auth');
-
-  } catch (e) {
-    console.error('Supabase init error:', e);
+  } catch(e) {
     showScreen('auth');
-    // Show a visible error — sb failed to init so button would silently do nothing
     setTimeout(() => {
-      showAuthError('Connection problem: ' + e.message + '. Please refresh the page. If this keeps happening, check your internet connection.');
+      showAuthError('Connection problem: ' + e.message + '. Please refresh the page.');
     }, 300);
   }
 }
 
 function showScreen(screen) {
-  // screen = 'supabase' | 'auth' | 'wizard' | null (shows app)
-  const overlaySupabase = document.getElementById('overlay-supabase');
-  const overlayAuth     = document.getElementById('overlay-auth');
-  const overlayWizard   = document.getElementById('overlay-wizard');
-  const app             = document.getElementById('app');
+  // screen = 'auth' | 'wizard' | null (shows app)
+  const overlayAuth   = document.getElementById('overlay-auth');
+  const overlayWizard = document.getElementById('overlay-wizard');
+  const app           = document.getElementById('app');
+  const obSupa        = document.getElementById('overlay-supabase');
+  if (obSupa) obSupa.style.display = 'none'; // legacy — hidden always
 
-  overlaySupabase.style.display = screen === 'supabase' ? 'flex' : 'none';
-  overlayAuth.style.display     = screen === 'auth'     ? 'flex' : 'none';
-  overlayWizard.style.display   = screen === 'wizard'   ? 'flex' : 'none';
-  app.style.display             = screen === null       ? 'flex' : 'none';
+  overlayAuth.style.display   = screen === 'auth'   ? 'flex' : 'none';
+  overlayWizard.style.display = screen === 'wizard' ? 'flex' : 'none';
+  app.style.display           = screen === null      ? 'flex' : 'none';
 }
 
 // ============================================================
@@ -1967,14 +1967,7 @@ function switchAuthTab(tab) {
   document.getElementById('auth-panel-register').style.display = tab === 'register' ? 'block' : 'none';
 }
 
-async function initRetry() {
-  if (sb) return;
-  try {
-    const sbUrl = 'https://klnmqsfpxlhmzymwunci.supabase.co';
-    const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtsbm1xc2ZweGxobXp5bXd1bmNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjM1NzQsImV4cCI6MjA5Nzc5OTU3NH0.uaM5wesAyrqP1KAtKwMwzH8E2KH7Y85fQ2sZQqPww8I';
-    sb = window.supabase.createClient(sbUrl, sbKey);
-  } catch(e) { showToast('❌ Cannot connect: ' + e.message); }
-}
+// initRetry — no longer needed (Firebase auth has no cold start)
 
 function showAuthError(msg) {
   const el = document.getElementById('auth-signin-error');
@@ -1986,64 +1979,25 @@ function clearAuthError() {
   if (el) el.style.display = 'none';
 }
 
-async function signIn(isRetry) {
+async function signIn() {
   const email    = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
   clearAuthError();
   if (!email || !password) { showAuthError('Please enter your email address and password.'); return; }
+  if (!fbAuth) { showAuthError('Authentication not ready — please refresh the page.'); return; }
   const btn = document.getElementById('btn-signin');
-  if (btn) { btn.disabled = true; btn.textContent = isRetry ? 'Reconnecting…' : 'Signing in…'; }
-
-  // Reassurance messages while waiting for Supabase cold start
-  const slowTimer = setTimeout(() => {
-    if (btn && btn.disabled) btn.textContent = 'Still connecting — almost there…';
-  }, 6000);
-  const slowTimer2 = setTimeout(() => {
-    if (btn && btn.disabled) btn.textContent = 'Waking up the server — nearly there…';
-  }, 20000);
-
-  // On first attempt: auto-retry after 90s. On retry: give up after 90s.
-  const timeoutTimer = setTimeout(() => {
-    clearTimeout(slowTimer); clearTimeout(slowTimer2);
-    if (!isRetry) {
-      // First timeout — silently retry once (server should be awake now)
-      if (btn) btn.textContent = 'Server awake — reconnecting…';
-      signIn(true);
-    } else {
-      // Second timeout — give up
-      showAuthError('Connection timed out. Please check your internet connection and try again.');
-      if (btn) { btn.disabled = false; btn.textContent = 'Sign in →'; }
-    }
-  }, 90000);
-
-  if (!sb) {
-    clearTimeout(slowTimer); clearTimeout(slowTimer2); clearTimeout(timeoutTimer);
-    showAuthError('Connection error — please refresh the page and try again.');
-    await initRetry();
-    if (btn) { btn.disabled = false; btn.textContent = 'Sign in →'; }
-    return;
-  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
   try {
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    clearTimeout(slowTimer); clearTimeout(slowTimer2); clearTimeout(timeoutTimer);
-    if (error) {
-      const msg = error.message === 'Invalid login credentials'
-        ? 'Email or password is incorrect. Please check and try again.'
-        : error.message;
-      showAuthError(msg);
-      if (btn) { btn.disabled = false; btn.textContent = 'Sign in →'; }
-    }
-    // onAuthStateChange handles success automatically — button stays disabled during load
+    await fbAuth.signInWithEmailAndPassword(email, password);
+    // onAuthStateChanged handles success automatically
   } catch(e) {
-    clearTimeout(slowTimer); clearTimeout(slowTimer2); clearTimeout(timeoutTimer);
-    if (!isRetry) {
-      // Auto-retry on network error too
-      if (btn) btn.textContent = 'Server awake — reconnecting…';
-      signIn(true);
-    } else {
-      showAuthError('Sign-in failed: ' + e.message + ' — please refresh the page.');
-      if (btn) { btn.disabled = false; btn.textContent = 'Sign in →'; }
-    }
+    const msg = (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential')
+      ? 'Email or password is incorrect. Please check and try again.'
+      : (e.code === 'auth/too-many-requests')
+      ? 'Too many attempts — please wait a moment and try again.'
+      : 'Sign-in error: ' + e.message;
+    showAuthError(msg);
+    if (btn) { btn.disabled = false; btn.textContent = 'Sign in →'; }
   }
 }
 
@@ -2052,35 +2006,33 @@ async function signUp() {
   const password = document.getElementById('auth-password-reg').value;
   const confirm  = document.getElementById('auth-confirm').value;
 
-  if (!email || !password) { showToast('Please enter email and password'); return; }
-  if (password !== confirm) { showToast('Passwords do not match'); return; }
-  if (password.length < 8)  { showToast('Password must be at least 8 characters'); return; }
+  if (!email || !password) { showAuthError('Please enter your email address and password.'); return; }
+  if (password !== confirm) { showAuthError('Passwords do not match — please try again.'); return; }
+  if (password.length < 8)  { showAuthError('Password must be at least 8 characters.'); return; }
+  if (!fbAuth) { showAuthError('Authentication not ready — please refresh the page.'); return; }
 
-  // Clear any stale session first
-  try { await sb.auth.signOut(); } catch(e) {}
+  const btn = document.querySelector('#auth-panel-register .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating account…'; }
 
   try {
-    const { data, error } = await sb.auth.signUp({ email, password });
-    if (error) {
-      showToast('❌ ' + error.message);
-    } else if (data && data.user) {
-      // Immediately sign in after signup (email confirm is off)
-      const { error: loginErr } = await sb.auth.signInWithPassword({ email, password });
-      if (loginErr) {
-        showToast('✅ Account created — please sign in.');
-        switchAuthTab('signin');
-        document.getElementById('auth-email').value = email;
-      }
-      // onAuthStateChange handles the rest
-    }
+    await fbAuth.createUserWithEmailAndPassword(email, password);
+    // onAuthStateChanged fires automatically on success — no further action needed
   } catch(e) {
-    showToast('❌ Error: ' + e.message);
+    const msg = e.code === 'auth/email-already-in-use'
+      ? 'An account with this email already exists — please sign in instead.'
+      : e.code === 'auth/weak-password'
+      ? 'Password is too weak — please use at least 8 characters.'
+      : e.code === 'auth/invalid-email'
+      ? 'Please enter a valid email address.'
+      : 'Could not create account: ' + e.message;
+    showAuthError(msg);
+    if (btn) { btn.disabled = false; btn.textContent = 'Create account →'; }
   }
 }
 
 async function signOut() {
   if (currentUser) await logAudit('logout', null, null, null);
-  await sb.auth.signOut();
+  if (fbAuth) await fbAuth.signOut();
   currentUser = null;
   PROFILE     = {};
   showScreen('auth');
@@ -2089,14 +2041,15 @@ async function signOut() {
 async function resetPassword() {
   const email = document.getElementById('auth-email').value.trim();
   if (!email) { showToast('Enter your email address first'); return; }
+  if (!fbAuth) { showToast('Authentication not ready — please refresh.'); return; }
   try {
-    const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://plenusos.github.io/plenusos/'
-    });
-    if (error) { showToast('❌ ' + error.message); return; }
+    await fbAuth.sendPasswordResetEmail(email);
     showToast('✅ Password reset email sent — check your inbox');
   } catch(e) {
-    showToast('❌ Could not send reset email: ' + e.message);
+    const msg = e.code === 'auth/user-not-found'
+      ? 'No account found with that email address.'
+      : 'Could not send reset email: ' + e.message;
+    showToast('❌ ' + msg);
   }
 }
 
@@ -2121,24 +2074,14 @@ async function setNewPassword() {
   if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
 
   try {
-    const { error } = await sb.auth.updateUser({ password: newPw });
-    if (error) {
-      errDiv.textContent = 'Could not set password: ' + error.message;
-      errDiv.style.display = 'block';
-      if (btn) { btn.disabled = false; btn.innerHTML = 'Set password &amp; sign in →'; }
-      return;
-    }
+    const user = fbAuth ? fbAuth.currentUser : null;
+    if (!user) { errDiv.textContent = 'Session expired — please sign in again.'; errDiv.style.display = 'block'; return; }
+    await user.updatePassword(newPw);
     // Success — hide overlay, load the app
     document.getElementById('overlay-reset-password').style.display = 'none';
     showToast('✅ Password updated! Welcome back.');
-    // Get fresh session after password update
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      currentUser = session.user;
-      await loadProfile();
-    } else {
-      showScreen('auth');
-    }
+    currentUser = user;
+    await loadProfile();
   } catch(e) {
     errDiv.textContent = 'An error occurred: ' + e.message;
     errDiv.style.display = 'block';
@@ -2153,13 +2096,13 @@ async function setNewPassword() {
 async function loadProfile() {
   if (!currentUser) return;
 
-  const localKey = 'plenusos_wz_' + currentUser.id;
+  const localKey = 'plenusos_wz_' + currentUser.uid;
 
   // Try Supabase for profile (mainly to check wizard_complete)
   let data = null;
   if (sb) {
     try {
-      const result = await sb.from('practitioner_profiles').select('*').eq('id', currentUser.id).single();
+      const result = await sb.from('practitioner_profiles').select('*').eq('id', currentUser.uid).single();
       if (!result.error) data = result.data;
       else if (result.error.code !== 'PGRST116') console.warn('Profile load:', result.error.message);
     } catch(e) { console.warn('Profile load exception:', e); }
@@ -2328,7 +2271,7 @@ async function saveProfileSettings() {
     updated_at:     new Date().toISOString()
   };
 
-  const { error } = await sb.from('practitioner_profiles').update(updates).eq('id', currentUser.id);
+  const { error } = await sb.from('practitioner_profiles').update(updates).eq('id', currentUser.uid);
 
   if (error) {
     showToast('❌ Error saving: ' + error.message);
@@ -2336,7 +2279,7 @@ async function saveProfileSettings() {
     Object.assign(PROFILE, updates);
     applyProfileToUI();
     showToast('✅ Profile saved!');
-    logAudit('update_profile', 'practitioner_profiles', currentUser.id, null);
+    logAudit('update_profile', 'practitioner_profiles', currentUser.uid, null);
   }
 }
 
@@ -2353,7 +2296,7 @@ async function saveIntegrations() {
   if (stripeVal && !stripeVal.startsWith('•')) updates.stripe_publishable_key = stripeVal;
   if (paypalVal && !paypalVal.startsWith('•')) updates.paypal_client_id       = paypalVal;
 
-  const { error } = await sb.from('practitioner_profiles').update(updates).eq('id', currentUser.id);
+  const { error } = await sb.from('practitioner_profiles').update(updates).eq('id', currentUser.uid);
 
   if (error) {
     showToast('❌ Error saving: ' + error.message);
@@ -2387,7 +2330,7 @@ async function loadAvailability() {
   const { data, error } = await sb
     .from('availability')
     .select('*')
-    .eq('practitioner_id', currentUser.id);
+    .eq('practitioner_id', currentUser.uid);
   if (error) { console.error('loadAvailability:', error); return; }
   AVAILABILITY = {};
   (data || []).forEach(row => { AVAILABILITY[row.day_of_week] = row; });
@@ -2426,7 +2369,7 @@ async function wizardSaveProgress() {
   // PRIMARY: localStorage — instant, no schema dependency, always reliable
   if (!currentUser) { showToast('⚠️ Not signed in — please sign in to save your progress.'); return; }
   try {
-    localStorage.setItem('plenusos_wz_' + currentUser.id, JSON.stringify({ step: wzStep, data: wzData }));
+    localStorage.setItem('plenusos_wz_' + currentUser.uid, JSON.stringify({ step: wzStep, data: wzData }));
     showToast('✅ Progress saved! Sign back in any time to continue.');
   } catch(e) {
     showToast('❌ Could not save locally: ' + e.message);
@@ -2436,7 +2379,7 @@ async function wizardSaveProgress() {
   if (sb) {
     try {
       await sb.from('practitioner_profiles').upsert({
-        id: currentUser.id, email: currentUser.email,
+        id: currentUser.uid, email: currentUser.email,
         wizard_step: wzStep, updated_at: new Date().toISOString()
       }, { onConflict: 'id' });
     } catch(e) { /* non-critical */ }
@@ -2462,7 +2405,7 @@ async function saveAvailability() {
   if (!sb || !currentUser) { showToast('Not signed in'); return; }
 
   const rows = AVAIL_DAYS.map(({ dow }) => ({
-    practitioner_id: currentUser.id,
+    practitioner_id: currentUser.uid,
     day_of_week:     dow,
     is_available:    document.getElementById(`avail-check-${dow}`)?.checked || false,
     start_time:      document.getElementById(`avail-start-${dow}`)?.value  || '09:00',
@@ -2479,7 +2422,7 @@ async function saveAvailability() {
   } else {
     rows.forEach(r => { AVAILABILITY[r.day_of_week] = r; });
     showToast('✅ Availability saved!');
-    logAudit('update_availability', 'availability', currentUser.id, null);
+    logAudit('update_availability', 'availability', currentUser.uid, null);
   }
 }
 
@@ -2521,7 +2464,7 @@ async function saveClient() {
   const btn = document.getElementById('save-client-btn');
   if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
   const newClient = {
-    practitioner_id:  currentUser.id,
+    practitioner_id:  currentUser.uid,
     first_name:       firstName,
     last_name:        lastName,
     email:            email || null,
@@ -2552,7 +2495,7 @@ async function loadClients() {
   const { data, error } = await sb
     .from('clients')
     .select('id, first_name, last_name, email, phone, pipeline_stage, presenting_issue, active, created_at, is_minor, tags')
-    .eq('practitioner_id', currentUser.id)
+    .eq('practitioner_id', currentUser.uid)
     .eq('active', true)
     .order('created_at', { ascending: false });
   if (error) {
@@ -2681,7 +2624,7 @@ async function openClientDetail(clientId) {
       .from('clients')
       .select('*')
       .eq('id', clientId)
-      .eq('practitioner_id', currentUser.id)
+      .eq('practitioner_id', currentUser.uid)
       .single();
     client = data;
   }
@@ -3119,7 +3062,7 @@ async function saveConsent() {
     const wording = CONSENT_WORDINGS[type];
     records.push({
       client_id:       CURRENT_CLIENT.id,
-      practitioner_id: currentUser.id,
+      practitioner_id: currentUser.uid,
       consent_type:    type,
       consent_given:   checkbox.checked,
       consent_date:    consentDate,
@@ -3154,7 +3097,7 @@ async function saveConsent() {
     await sb.from('clients')
       .update(clientUpdates)
       .eq('id', CURRENT_CLIENT.id)
-      .eq('practitioner_id', currentUser.id);
+      .eq('practitioner_id', currentUser.uid);
     // Update local CURRENT_CLIENT cache
     Object.assign(CURRENT_CLIENT, clientUpdates);
   }
@@ -3301,7 +3244,7 @@ async function saveAppointment() {
   }
 
   const record = {
-    practitioner_id:  currentUser.id,
+    practitioner_id:  currentUser.uid,
     client_id:        clientId,
     client_name:      clientName,
     appointment_type: document.getElementById('apt-type')?.value     || 'Consultation',
@@ -3350,7 +3293,7 @@ async function loadClientAppointments(clientId) {
     .from('appointments')
     .select('id, appointment_type, duration_minutes, appt_date, appt_time, format, status, notes, created_at')
     .eq('client_id', clientId)
-    .eq('practitioner_id', currentUser.id)
+    .eq('practitioner_id', currentUser.uid)
     .order('appt_date', { ascending: false })
     .order('appt_time', { ascending: false });
 
@@ -3445,7 +3388,7 @@ async function updateAppointmentStatus(aptId, newStatus) {
     .from('appointments')
     .update({ status: newStatus })
     .eq('id', aptId)
-    .eq('practitioner_id', currentUser.id);
+    .eq('practitioner_id', currentUser.uid);
 
   if (error) {
     showToast('❌ Status update failed: ' + error.message);
@@ -4145,7 +4088,7 @@ async function saveWizardProgress() {
 
   // PRIMARY: localStorage — instant, no schema dependency, always reliable
   try {
-    localStorage.setItem('plenusos_wz_' + currentUser.id, JSON.stringify({ step: wzStep, data: wzData }));
+    localStorage.setItem('plenusos_wz_' + currentUser.uid, JSON.stringify({ step: wzStep, data: wzData }));
   } catch(e) {
     showToast('⚠️ Could not save locally: ' + e.message);
     return;
@@ -4155,7 +4098,7 @@ async function saveWizardProgress() {
   if (!sb) return;
   try {
     const { error } = await sb.from('practitioner_profiles').upsert({
-      id:              currentUser.id,
+      id:              currentUser.uid,
       email:           currentUser.email,
       wizard_complete: false,
       wizard_step:     wzStep,
@@ -6650,13 +6593,13 @@ async function completeWizard() {
 
   // Always save full wizard data to localStorage — this is the permanent profile backup
   try {
-    localStorage.setItem('plenusos_profile_' + currentUser.id, JSON.stringify(wzData));
+    localStorage.setItem('plenusos_profile_' + currentUser.uid, JSON.stringify(wzData));
   } catch(e) {}
 
   // Build Supabase payload — serialise any arrays/objects so column type mismatches don't crash everything
   if (sb) {
     const supaPayload = {
-      id:              currentUser.id,
+      id:              currentUser.uid,
       email:           currentUser.email,
       wizard_complete: true,
       updated_at:      new Date().toISOString()
@@ -6671,7 +6614,7 @@ async function completeWizard() {
         // Fall back to just marking wizard complete — wizard data lives in localStorage
         try {
           await sb.from('practitioner_profiles').upsert({
-            id: currentUser.id, email: currentUser.email,
+            id: currentUser.uid, email: currentUser.email,
             wizard_complete: true, wizard_step: wzStep, updated_at: new Date().toISOString()
           }, { onConflict: 'id' });
         } catch(e2) { /* non-critical — local copy is safe */ }
@@ -6680,7 +6623,7 @@ async function completeWizard() {
   }
 
   // Always proceed — data is safe in localStorage regardless of Supabase outcome
-  try { localStorage.removeItem('plenusos_wz_' + currentUser.id); } catch(e) {}
+  try { localStorage.removeItem('plenusos_wz_' + currentUser.uid); } catch(e) {}
   PROFILE = { ...PROFILE, ...wzData };
   CONFIG.claudeApiKey         = wzData.claude_api_key         || '';
   CONFIG.stripePublishableKey = wzData.stripe_publishable_key || '';
@@ -6700,7 +6643,7 @@ async function logAudit(action, resourceType, resourceId, clientName) {
   if (!sb || !currentUser) return;
   try {
     await sb.from('audit_log').insert({
-      practitioner_id: currentUser.id,
+      practitioner_id: currentUser.uid,
       action,
       resource_type:   resourceType,
       resource_id:     resourceId,
