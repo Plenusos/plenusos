@@ -161,8 +161,8 @@ textarea{resize:vertical;min-height:90px;}
 .nf-overlay.active{display:flex;}
 .nf-overlay-card{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.12);width:100%;max-width:480px;padding:28px;position:relative;}
 .nf-overlay-card.wide{max-width:640px;}
-#overlay-wizard .nf-overlay-card{max-height:96vh;display:flex;flex-direction:column;padding:16px 24px;overflow:hidden;}
-#wz-body{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;padding-right:4px;}
+#overlay-wizard .nf-overlay-card{max-height:92vh;display:flex;flex-direction:column;padding:16px 24px;overflow:hidden;}
+#wz-body{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;padding-right:4px;-webkit-overflow-scrolling:touch;}
 .nf-logo{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .nf-logo-mark{width:40px;height:40px;display:flex;align-items:center;justify-content:center;}
 .nf-logo-text{font-size:20px;font-weight:700;}
@@ -186,9 +186,9 @@ textarea{resize:vertical;min-height:90px;}
 .wz-palette-opt.selected{border-color:var(--violet);}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- Firebase Auth (compat SDK — works without bundler) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<!-- Firebase Auth (compat SDK v9 via jsDelivr) -->
+<script src="https://cdn.jsdelivr.net/npm/firebase@9.23.0/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -1872,6 +1872,11 @@ async function init() {
   fixDates();
 
   // Initialise Firebase Auth
+  if (typeof firebase === 'undefined') {
+    showScreen('auth');
+    setTimeout(() => showAuthError('Could not load authentication — please refresh the page.'), 300);
+    return;
+  }
   const firebaseConfig = {
     apiKey:            "AIzaSyDLxRyBNO0E2Yc4j2LukUtk2jJs57vbJIs",
     authDomain:        "plenusos.firebaseapp.com",
@@ -4180,7 +4185,18 @@ function getWizardStepHTML(step) {
     // ── STEP 0 · WELCOME ──────────────────────────────────────────
     case 0: return `
       <div style="text-align:center;margin-bottom:24px;">
-        <div style="font-size:42px;margin-bottom:10px;">🌿</div>
+        <div style="margin-bottom:14px;display:flex;justify-content:center;">
+          <svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="ribbon-grad" x1="0" y1="0" x2="64" y2="40" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#2C00CB"/>
+                <stop offset="100%" stop-color="#AB86FA"/>
+              </linearGradient>
+            </defs>
+            <path d="M2 34 C10 34 14 6 32 6 C50 6 54 34 62 34" stroke="url(#ribbon-grad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+            <path d="M2 24 C12 24 18 16 32 16 C46 16 52 24 62 24" stroke="#8F61F7" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.45"/>
+          </svg>
+        </div>
         <h2 style="font-size:22px;font-weight:800;color:var(--charcoal);margin:0 0 8px;">Welcome to PlenusOS</h2>
         <p style="font-size:14px;color:var(--grey-500);line-height:1.6;margin:0;">This short setup builds the foundation of your practice — your brand, your website, your story. Answer in your own words and we'll do the rest.</p>
       </div>
