@@ -147,13 +147,32 @@ textarea{resize:vertical;min-height:90px;}
 .toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:all 0.2s;}
 .toggle.on::after{left:23px;}
 /* WEBSITE BUILDER */
-.wb-section{border:2px solid transparent;border-radius:12px;margin-bottom:8px;transition:all 0.2s;position:relative;}
-.wb-section:hover{border-color:var(--violet);}
-.wb-section:hover .wb-controls{display:flex;}
-.wb-controls{display:none;position:absolute;top:8px;right:8px;gap:6px;z-index:10;}
+.wb-section{border:2px solid var(--grey-200);border-radius:12px;margin-bottom:12px;transition:all 0.2s;position:relative;}
+.wb-section:hover{border-color:var(--violet);box-shadow:0 0 0 3px rgba(44,0,203,0.05);}
+.wb-controls{display:flex;position:absolute;top:8px;right:8px;gap:5px;z-index:10;background:rgba(255,255,255,0.97);border-radius:8px;padding:3px 5px;box-shadow:0 2px 8px rgba(0,0,0,0.12);}
+.wb-hero .wb-controls{background:rgba(20,20,40,0.78);}
+.wb-hero .wb-controls .btn{color:#fff!important;border-color:rgba(255,255,255,0.35)!important;background:rgba(255,255,255,0.08)!important;}
+.wb-section-label{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:0.8px;color:var(--violet);background:#F5F3FF;border-radius:4px;padding:2px 8px;margin-bottom:10px;text-transform:uppercase;}
 .wb-inner{padding:20px 24px;}
-[contenteditable=true]{outline:none;cursor:text;}
-[contenteditable=true]:focus{background:rgba(124,58,237,0.04);border-radius:6px;}
+[contenteditable=true]{outline:none;cursor:text;border-radius:4px;transition:background 0.15s,outline 0.15s;}
+[contenteditable=true]:not(:focus):hover{background:rgba(44,0,203,0.05);outline:1.5px dashed rgba(44,0,203,0.35);outline-offset:2px;}
+[contenteditable=true]:focus{background:rgba(124,58,237,0.06);outline:2px solid var(--violet);border-radius:4px;}
+.wb-section-pill{padding:4px 10px;font-size:11px;font-weight:600;border:1.5px solid var(--grey-300);border-radius:20px;background:#fff;color:var(--grey-600);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.wb-section-pill:hover,.wb-section-pill.active{border-color:var(--violet);background:#F5F3FF;color:var(--violet);}
+.wb-add-section-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;align-items:center;justify-content:center;}
+.wb-add-section-modal.open{display:flex;}
+.wb-add-section-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.wb-add-section-opt{padding:14px;border:1.5px solid var(--grey-200);border-radius:10px;cursor:pointer;text-align:left;background:#fff;transition:all 0.15s;}
+.wb-add-section-opt:hover{border-color:var(--violet);background:#F5F3FF;}
+.wb-add-section-opt .opt-icon{font-size:22px;margin-bottom:6px;}
+.wb-add-section-opt .opt-title{font-size:13px;font-weight:700;color:var(--charcoal);}
+.wb-add-section-opt .opt-sub{font-size:11px;color:var(--grey-500);margin-top:2px;}
+.wb-image-strip-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:8px;}
+.wb-image-strip-grid img{width:100%;height:140px;object-fit:cover;border-radius:10px;display:block;}
+.wb-image-strip-picker{display:none;background:var(--grey-50);border-radius:10px;padding:12px;margin-top:10px;}
+.wb-image-strip-picker .img-opt{cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid transparent;transition:border-color 0.2s;}
+.wb-image-strip-picker .img-opt:hover{border-color:var(--violet);}
+.wb-image-strip-picker img{width:100%;height:70px;object-fit:cover;display:block;}
 .wb-hero{background:linear-gradient(135deg,var(--charcoal),#3d3f5a);color:#fff;border-radius:12px;}
 .wb-hero h1{font-size:32px;font-weight:800;margin-bottom:12px;line-height:1.2;}
 .wb-hero p{font-size:16px;opacity:0.85;margin-bottom:20px;max-width:560px;}
@@ -225,9 +244,28 @@ textarea{resize:vertical;min-height:90px;}
 .wz-palette-opt{border:2px solid var(--grey-200);border-radius:12px;padding:14px;cursor:pointer;transition:border-color 0.2s;}
 .wz-palette-opt.selected{border-color:var(--violet);}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- Firebase Auth (compat SDK v9 via jsDelivr) -->
-<!-- Firebase removed — auth now handled by Supabase (no googleapis dependency) -->
+<!-- Supabase: primary CDN (jsDelivr), fallback to unpkg if blocked by an extension -->
+<script>
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  s.onerror = function() {
+    // Primary CDN blocked — try unpkg (different domain, usually whitelisted)
+    var s2 = document.createElement('script');
+    s2.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js';
+    s2.onerror = function() {
+      // Both blocked — show message
+      document.addEventListener('DOMContentLoaded', function() {
+        var el = document.getElementById('auth-cdn-error');
+        if (el) { el.style.display = 'block'; el.textContent = '⚠️ Your browser extension is blocking PlenusOS. Please disable it on this page, or try a different browser. (Blocked: supabase library)'; }
+      });
+    };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
+})();
+</script>
+<!-- Firebase removed — auth now via Supabase, no googleapis dependency -->
 </head>
 <body>
 
@@ -268,7 +306,9 @@ textarea{resize:vertical;min-height:90px;}
       <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Create account</div>
     </div>
     <div id="auth-panel-signin">
+      <div id="auth-cdn-error" style="display:none;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#b91c1c;line-height:1.5;"></div>
       <div id="auth-signin-error" style="display:none;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#b91c1c;line-height:1.5;"></div>
+      <div style="font-size:11px;color:var(--grey-400);text-align:center;margin-bottom:10px;">🔒 Works in all browsers — no incognito needed.<br>If login fails, disable any ad-blocker or privacy extension on this page.</div>
       <div class="form-group"><label>Email address</label><input type="email" id="auth-email" class="wz-input" placeholder="you@example.com" autocomplete="email"></div>
       <div class="form-group"><label>Password</label><input type="password" id="auth-password" class="wz-input" placeholder="••••••••" autocomplete="current-password"></div>
       <button class="btn btn-primary" id="btn-signin" style="width:100%;justify-content:center;padding:12px;margin-bottom:10px;" onclick="signIn()">Sign in →</button>
@@ -504,7 +544,7 @@ textarea{resize:vertical;min-height:90px;}
             <div class="card-title">Your Business Setup</div>
             <div class="card-sub">Complete each phase to launch a fully-working business — nothing gets skipped</div>
           </div>
-          <button class="btn btn-primary" id="db-setup-btn" onclick="document.getElementById('overlay-wizard').style.display='flex';renderWizardStep();">Continue Setup →</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" id="db-setup-btn" onclick="document.getElementById('overlay-wizard').style.display='flex';renderWizardStep();">Continue Setup →</button><button class="btn btn-secondary" onclick="wzStep=1;document.getElementById('overlay-wizard').style.display='flex';renderWizardStep();" title="Go back to step 1 to review everything">Review from Start</button></div>
         </div>
         <div style="background:var(--grey-100);border-radius:6px;height:6px;margin-bottom:14px;overflow:hidden;">
           <div id="db-setup-bar" style="height:100%;background:linear-gradient(90deg,var(--violet),var(--violet-light));border-radius:6px;width:0%;transition:width 0.4s;"></div>
@@ -569,6 +609,20 @@ textarea{resize:vertical;min-height:90px;}
             <div style="font-size:12px;font-weight:700;color:var(--charcoal);">Programmes</div>
             <div style="font-size:11px;color:var(--grey-500);margin-top:2px;">Courses &amp; group work</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Services quick-view -->
+      <div class="card" style="margin-bottom:20px;" id="db-services-card">
+        <div class="card-header" style="margin-bottom:14px;">
+          <div>
+            <div class="card-title">Your Services</div>
+            <div class="card-sub">Edit pricing, descriptions or remove services you no longer offer</div>
+          </div>
+          <button class="btn btn-primary" onclick="openWizardAtStep(11)">+ Add / Edit Services</button>
+        </div>
+        <div id="db-services-list" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="text-align:center;padding:28px;color:var(--grey-400);font-size:13px;">Complete the wizard to see your services here</div>
         </div>
       </div>
 
@@ -959,8 +1013,16 @@ textarea{resize:vertical;min-height:90px;}
           <span style="font-size:10px;font-weight:600;color:#059669;background:#DCFCE7;padding:2px 8px;border-radius:10px;">● Preview</span>
         </div>
 
-        <div style="border-top:1px solid var(--grey-100);margin-top:10px;padding-top:4px;font-size:11px;color:var(--grey-400);text-align:center;">
-          ↓ Scroll through your site sections below — click any text to edit it directly
+        <!-- Section management pills -->
+        <div style="border-top:1px solid var(--grey-100);margin-top:10px;padding-top:10px;padding-bottom:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:700;color:var(--grey-400);letter-spacing:0.5px;margin-right:2px;white-space:nowrap;">JUMP TO:</span>
+          <button class="wb-section-pill active" onclick="document.querySelector('.wb-hero').scrollIntoView({behavior:'smooth'})">🎯 Hero</button>
+          <button class="wb-section-pill" onclick="document.querySelector('.wb-about').scrollIntoView({behavior:'smooth'})">👤 About</button>
+          <button class="wb-section-pill" onclick="document.querySelector('.wb-services').scrollIntoView({behavior:'smooth'})">🛒 Services</button>
+          <button class="wb-section-pill" onclick="document.querySelector('.wb-testimonials').scrollIntoView({behavior:'smooth'})">⭐ Testimonials</button>
+          <button class="wb-section-pill" onclick="document.querySelector('.wb-contact').scrollIntoView({behavior:'smooth'})">📬 Contact</button>
+          <span style="flex:1;"></span>
+          <span style="font-size:10px;color:var(--grey-400);">✏️ Click any text to edit it · Hover section for controls</span>
         </div>
 
         <!-- LOGO + NAV HEADER -->
@@ -995,8 +1057,8 @@ textarea{resize:vertical;min-height:90px;}
         <div class="wb-section wb-hero" style="position:relative;overflow:hidden;">
           <div class="wb-controls" style="flex-wrap:wrap;gap:6px;">
             <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="aiWriteSection('hero')">✨ AI Rewrite</button>
-            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="toggleHeroImagePicker()">🖼️ Background Image</button>
-            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="document.getElementById('wb-hero-bg-input').click()">📁 Upload Own</button>
+            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="toggleHeroImagePicker()">🖼️ Background</button>
+            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="document.getElementById('wb-hero-bg-input').click()">📁 Upload</button>
           </div>
           <!-- Free image picker -->
           <div id="wb-img-picker" style="display:none;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;margin-bottom:8px;">
@@ -1022,7 +1084,7 @@ textarea{resize:vertical;min-height:90px;}
           <div id="wb-hero-bg-overlay" style="display:none;position:absolute;inset:0;background-size:cover;background-position:center;z-index:0;opacity:0.15;pointer-events:none;"></div>
           <input type="file" id="wb-hero-bg-input" accept="image/*" style="display:none;" onchange="uploadWbHeroBg(this)">
           <div class="wb-inner" style="position:relative;z-index:1;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:1px;opacity:0.6;margin-bottom:8px;text-transform:uppercase;">Hero Section — click to edit</div>
+            <div class="wb-section-label">🎯 Hero — click any text to edit</div>
             <h1 contenteditable="true" id="wb-hero-h1">Your headline goes here</h1>
             <p contenteditable="true" id="wb-hero-p">Use the ✨ AI Rewrite button above to generate your headline and tagline from your wizard answers, or click here to type your own.</p>
             <div class="wb-cta-row">
@@ -1050,7 +1112,7 @@ textarea{resize:vertical;min-height:90px;}
           </div>
           <input type="file" id="wb-photo-input" accept="image/*" style="display:none;" onchange="uploadWbPhoto(this)">
           <div class="wb-inner">
-            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--grey-400);margin-bottom:8px;text-transform:uppercase;">About Section</div>
+            <div class="wb-section-label">👤 About</div>
             <div style="display:flex;gap:24px;align-items:flex-start;">
               <div style="position:relative;flex-shrink:0;">
                 <div id="wb-photo-placeholder" style="width:100px;height:120px;border-radius:14px;background:linear-gradient(135deg,#E8E0F0,#D4C5F0);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;border:2px dashed var(--grey-300);transition:all 0.2s;overflow:hidden;" onclick="document.getElementById('wb-photo-input').click()" title="Upload your photo">
@@ -1074,7 +1136,7 @@ textarea{resize:vertical;min-height:90px;}
             <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="aiWriteSection('services')">✨ AI Rewrite</button>
           </div>
           <div class="wb-inner">
-            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--grey-400);margin-bottom:8px;text-transform:uppercase;">Services Section</div>
+            <div class="wb-section-label">🛒 Services</div>
             <h2 contenteditable="true" style="font-size:22px;font-weight:800;margin-bottom:4px;">How I Can Help You</h2>
             <p contenteditable="true" style="font-size:14px;color:var(--grey-500);margin-bottom:16px;">Choose the right level of support for where you are right now</p>
             <div class="wb-service-grid">
@@ -1104,20 +1166,21 @@ textarea{resize:vertical;min-height:90px;}
         <div class="wb-section wb-testimonials" style="border:1px solid var(--grey-200);">
           <div class="wb-controls">
             <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="aiWriteSection('testimonials')">✨ AI Write</button>
+            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="addWbTestimonial()">+ Add</button>
           </div>
           <div class="wb-inner">
-            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--grey-400);margin-bottom:8px;text-transform:uppercase;">Testimonials Section</div>
+            <div class="wb-section-label">⭐ Testimonials — replace with real client words</div>
             <h2 contenteditable="true" style="font-size:22px;font-weight:800;margin-bottom:16px;">What Clients Say</h2>
             <div class="wb-testimonial-grid">
               <div class="wb-testimonial">
                 <div class="stars">★★★★★</div>
-                <p contenteditable="true">"Within 6 weeks my bloating had completely gone and I had more energy than I'd had in years. Helen's approach is thorough, warm, and genuinely life-changing."</p>
-                <div class="author" contenteditable="true">— Sarah T., London</div>
+                <p contenteditable="true">"[Replace with a real client testimonial — what changed for them, how they felt, what was different. One genuine quote is worth ten made-up ones.]"</p>
+                <div class="author" contenteditable="true">— [Client name, Location]</div>
               </div>
               <div class="wb-testimonial">
                 <div class="stars">★★★★★</div>
-                <p contenteditable="true">"I'd tried everything before finding Helen. Her personalised meal plan and supplement protocol sorted my gut issues in a way no GP ever had. Can't recommend highly enough."</p>
-                <div class="author" contenteditable="true">— Emma R., Manchester</div>
+                <p contenteditable="true">"[Add another client testimonial here — or leave this section hidden until you have real ones to share.]"</p>
+                <div class="author" contenteditable="true">— [Client name, Location]</div>
               </div>
             </div>
           </div>
@@ -1129,7 +1192,7 @@ textarea{resize:vertical;min-height:90px;}
             <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="aiWriteSection('contact')">✨ AI Rewrite</button>
           </div>
           <div class="wb-inner" style="text-align:center;">
-            <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--grey-400);margin-bottom:8px;text-transform:uppercase;">Contact / CTA Section</div>
+            <div class="wb-section-label">📬 Contact</div>
             <h2 contenteditable="true" style="font-size:24px;font-weight:800;margin-bottom:8px;">Ready to Feel Like Yourself Again?</h2>
             <p contenteditable="true" style="font-size:14px;color:var(--grey-600);margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto;">Book a free 20-minute discovery call and let's talk about how I can help you get your energy, digestion, and health back on track.</p>
             <button class="btn btn-primary" style="padding:12px 28px;font-size:14px;" contenteditable="true">Book Your Free Call</button>
@@ -1138,7 +1201,7 @@ textarea{resize:vertical;min-height:90px;}
         </div>
 
         <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
-          <button class="btn btn-secondary">+ Add Section</button>
+          <button class="btn btn-secondary" onclick="showAddSectionModal()">+ Add Section</button>
           <button class="btn btn-primary" onclick="showToast('✅ Changes saved!')">💾 Save Changes</button>
         </div>
       </div>
@@ -2648,6 +2711,7 @@ function applyProfileToUI() {
     });
   }
   updateDashboardProgress();
+  renderDashboardServices();
   setTimeout(updateSidebarSteps, 100);
   setTimeout(updateSettingsSectionStatus, 200);
   const notice = document.querySelector('.db-notice');
@@ -2851,13 +2915,25 @@ async function saveAvailability() {
     end_time:        document.getElementById(`avail-end-${dow}`)?.value    || '17:00',
   }));
 
+  // Try dedicated availability table first; fall back to practitioner_profiles
   const { error } = await sb
     .from('availability')
     .upsert(rows, { onConflict: 'practitioner_id,day_of_week' });
 
   if (error) {
-    showToast('❌ Error saving: ' + error.message);
-    console.error('saveAvailability:', error);
+    // Table might not exist — save into practitioner_profiles.availability_days instead
+    const avMap = {};
+    rows.forEach(r => { avMap[r.day_of_week] = { enabled: r.is_available, start: r.start_time, end: r.end_time }; });
+    const fallback = await profileSave({ availability_days: avMap });
+    if (fallback.error) {
+      showToast('❌ Could not save availability — ' + (error.message || 'unknown error'));
+      console.error('saveAvailability fallback error:', fallback.error);
+    } else {
+      if (!wzData) wzData = {};
+      wzData.availability_days = avMap;
+      rows.forEach(r => { AVAILABILITY[r.day_of_week] = r; });
+      showToast('✅ Availability saved!'); markSettingsSectionDone(6); updateSidebarSteps();
+    }
   } else {
     rows.forEach(r => { AVAILABILITY[r.day_of_week] = r; });
     showToast('✅ Availability saved!'); markSettingsSectionDone(6); updateSidebarSteps();
@@ -4656,7 +4732,7 @@ function getWizardStepHTML(step) {
           </svg>
         </div>
         <h2 style="font-size:22px;font-weight:800;color:var(--charcoal);margin:0 0 8px;">Welcome to PlenusOS</h2>
-        <p style="font-size:14px;color:var(--grey-500);line-height:1.6;margin:0;">This short setup builds the foundation of your practice — your brand, your website, your story. Answer in your own words and we'll do the rest.</p>
+        <p style="font-size:14px;color:var(--grey-500);line-height:1.6;margin:0;">This short setup builds the foundation of your business — your brand, your website, your story. Answer in your own words and we'll do the rest.</p>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
@@ -5118,9 +5194,9 @@ function getWizardStepHTML(step) {
           </div>
 
           <div>
-            <div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:4px;">What would you NOT want your practice to become?</div>
+            <div style="font-size:13px;font-weight:600;color:var(--charcoal);margin-bottom:4px;">What would you NOT want your business to become?</div>
             <div style="font-size:11px;color:var(--grey-500);margin-bottom:8px;">The version of this you are determined to avoid. The anti-vision.</div>
-            <textarea id="wz-vision-antivision" class="wz-input" style="min-height:80px;" oninput="debounceAutosave()" placeholder="I do not want a practice that...">${wzData.vision_antivision || ''}</textarea>
+            <textarea id="wz-vision-antivision" class="wz-input" style="min-height:80px;" oninput="debounceAutosave()" placeholder="I do not want a business that...">${wzData.vision_antivision || ''}</textarea>
           </div>
         </div>`;
     }
@@ -5391,8 +5467,8 @@ function getWizardStepHTML(step) {
                 <label>Price <span style="color:var(--grey-400);font-weight:400;">(£ GBP)</span></label>
                 <div style="display:flex;gap:6px;">
                   <input type="number" class="wz-input wz-svc-price" placeholder="e.g. 150" min="0" value="${svc.price||''}" style="flex:1;">
-                  <select class="wz-input wz-svc-price-type" style="width:120px;">
-                    ${['Per session','Per month','In full','Per class','Per week'].map(pt => `<option ${(svc.price_type||'Per session')===pt?'selected':''}>${pt}</option>`).join('')}
+                  <select class="wz-input wz-svc-price-type" style="width:130px;">
+                    ${['','Per session','Per week','Per month','In full','Per class'].map(pt => `<option value="${pt}" ${(svc.price_type||'')===pt?'selected':''}>${pt||'Frequency...'}</option>`).join('')}
                   </select>
                 </div>
               </div>
@@ -5414,7 +5490,7 @@ function getWizardStepHTML(step) {
           <div style="font-size:20px;">✨</div>
           <div>
             <div style="font-size:13px;font-weight:700;color:var(--charcoal);">Generate service descriptions</div>
-            <div style="font-size:11px;color:var(--grey-500);margin-top:1px;">Fill in the service names above, then tap Generate — we'll write a description for each one based on your practice.</div>
+            <div style="font-size:11px;color:var(--grey-500);margin-top:1px;">Fill in the service names above, then tap Generate — we'll write a description for each one based on your work.</div>
           </div>
         </div>
         <button type="button" id="btn-gen-services" onclick="generateServiceDescriptions()"
@@ -6275,7 +6351,7 @@ function getBrandPhaseContent(phase) {
       ];
       const sel = wzData.brand_archetype;
       return `
-        <p style="font-size:13px;color:var(--grey-500);margin-bottom:14px;">Which of these best captures how your practice shows up? Pick the one that feels most true.</p>
+        <p style="font-size:13px;color:var(--grey-500);margin-bottom:14px;">Which of these best captures how your business shows up? Pick the one that feels most true.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
           ${archetypes.map(a => {
             const isSel = sel === a.key;
@@ -6302,7 +6378,7 @@ function getBrandPhaseContent(phase) {
       const sel = wzData.brand_vibe;
       return `
         <div>
-          <p style="font-size:13px;color:var(--grey-500);margin-bottom:14px;">What does it actually feel like to work with you? Pick the vibe that best describes you and your practice.</p>
+          <p style="font-size:13px;color:var(--grey-500);margin-bottom:14px;">What does it actually feel like to work with you? Pick the vibe that best describes you and your business.</p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
             ${vibes.map(v => {
               const isSel = sel === v.key;
@@ -7007,7 +7083,7 @@ function addWizardService() {
   if (!wzData.services) wzData.services = [];
   // Collect any typed data from existing service cards before adding a new one
   collectWizardStep(11);
-  wzData.services.push({ name:'', duration:'', description:'', delivery:'Online', price:'', price_type:'Per session', sliding_scale:false, payment_plan:false });
+  wzData.services.push({ name:'', duration:'', description:'', delivery:'Online', price:'', price_type:'', sliding_scale:false, payment_plan:false });
   renderWizardStep();
 }
 
@@ -8475,6 +8551,248 @@ function refreshWebsiteFromProfile() {
   }
 }
 
+// ============================================================
+// DASHBOARD — Services quick-view with edit/delete
+// ============================================================
+
+function renderDashboardServices() {
+  const list = document.getElementById('db-services-list');
+  if (!list) return;
+  const services = (wzData && wzData.services) ? wzData.services.filter(s => s.name) : [];
+  if (!services.length) {
+    list.innerHTML = '<div style="text-align:center;padding:28px;color:var(--grey-400);font-size:13px;">No services set up yet — complete Step 3 of the wizard to add your offerings.</div>';
+    return;
+  }
+  list.innerHTML = services.map((s, idx) => {
+    const priceStr = s.price ? '£' + s.price + (s.price_type ? ' ' + s.price_type.toLowerCase() : '') : 'Price not set';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--grey-200);border-radius:10px;gap:10px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--charcoal);">${s.name}</div>
+        <div style="font-size:12px;color:var(--grey-500);margin-top:2px;">${s.duration ? s.duration + ' · ' : ''}${s.delivery || ''} · <strong style="color:var(--violet);">${priceStr}</strong></div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button onclick="openWizardAtStep(11)" class="btn btn-secondary" style="font-size:11px;padding:4px 10px;">✏️ Edit</button>
+        <button onclick="deleteDashboardService(${idx})" class="btn" style="font-size:11px;padding:4px 10px;background:none;border:1px solid #fca5a5;color:#ef4444;border-radius:6px;">✕ Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteDashboardService(idx) {
+  if (!wzData.services || wzData.services.length <= 1) {
+    showToast('You need at least one service — edit it instead of deleting');
+    return;
+  }
+  wzData.services.splice(idx, 1);
+  debounceAutosave();
+  renderDashboardServices();
+  showToast('Service removed');
+}
+
+// ============================================================
+// WEBSITE BUILDER — Add/Remove sections
+// ============================================================
+
+function showAddSectionModal() {
+  document.getElementById('wb-add-section-modal').classList.add('open');
+}
+function closeAddSectionModal() {
+  document.getElementById('wb-add-section-modal').classList.remove('open');
+}
+
+function addWbSection(type) {
+  closeAddSectionModal();
+  const wbContact = document.querySelector('.wb-contact');
+  if (!wbContact) { showToast('Builder not loaded — open the Website page first'); return; }
+
+  let html = '';
+
+  if (type === 'images') {
+    const imgs = [
+      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80',
+      'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&q=80',
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80'
+    ];
+    html = `<div class="wb-section wb-image-strip" style="border:1px solid var(--grey-200);">
+      <div class="wb-controls">
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="swapWbImages(this)">🖼️ Swap Images</button>
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;color:#ef4444!important;border-color:#fca5a5!important;" onclick="removeWbSection(this)">✕ Remove</button>
+      </div>
+      <div class="wb-inner" style="padding:16px 20px;">
+        <div class="wb-section-label">🖼️ Image Strip — click "Swap Images" to change</div>
+        <div class="wb-image-strip-grid">
+          <img src="${imgs[0]}" alt="wellness" style="border-radius:12px;cursor:pointer;" onclick="cycleWbImage(this)">
+          <img src="${imgs[1]}" alt="wellness" style="border-radius:12px;cursor:pointer;" onclick="cycleWbImage(this)">
+          <img src="${imgs[2]}" alt="wellness" style="border-radius:12px;cursor:pointer;" onclick="cycleWbImage(this)">
+        </div>
+        <div style="font-size:10px;color:var(--grey-400);margin-top:8px;text-align:center;">Click any image to cycle through options · Upload your own with the file tool</div>
+      </div>
+    </div>`;
+  } else if (type === 'faq') {
+    html = `<div class="wb-section wb-faq" style="border:1px solid var(--grey-200);">
+      <div class="wb-controls">
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="aiWriteSection('faq',this.closest('.wb-section'))">✨ AI Write</button>
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;color:#ef4444!important;border-color:#fca5a5!important;" onclick="removeWbSection(this)">✕ Remove</button>
+      </div>
+      <div class="wb-inner">
+        <div class="wb-section-label">❓ FAQ</div>
+        <h2 contenteditable="true" style="font-size:22px;font-weight:800;margin-bottom:16px;">Frequently Asked Questions</h2>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="border:1px solid var(--grey-200);border-radius:10px;padding:14px;">
+            <div contenteditable="true" style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">How does the first session work?</div>
+            <div contenteditable="true" style="font-size:13px;color:var(--grey-600);line-height:1.6;">Your initial consultation is a deep-dive into your health history, symptoms, lifestyle, and goals. I'll ask detailed questions about your diet, sleep, stress, and energy so I can build a complete picture before we start.</div>
+          </div>
+          <div style="border:1px solid var(--grey-200);border-radius:10px;padding:14px;">
+            <div contenteditable="true" style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">How long until I see results?</div>
+            <div contenteditable="true" style="font-size:13px;color:var(--grey-600);line-height:1.6;">Most clients notice meaningful changes within 4–6 weeks, though some feel improvements in energy and digestion within the first 2 weeks. Lasting change takes time — I'm with you every step.</div>
+          </div>
+          <div style="border:1px solid var(--grey-200);border-radius:10px;padding:14px;">
+            <div contenteditable="true" style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">Do I need to buy supplements?</div>
+            <div contenteditable="true" style="font-size:13px;color:var(--grey-600);line-height:1.6;">Supplements are recommended where there's a clear need — but they're never the whole story. Food-first is always my approach. I'll only suggest what's genuinely useful for your situation.</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  } else if (type === 'process') {
+    html = `<div class="wb-section wb-process" style="border:1px solid var(--grey-200);">
+      <div class="wb-controls">
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="removeWbSection(this)" style="color:#ef4444!important;border-color:#fca5a5!important;">✕ Remove</button>
+      </div>
+      <div class="wb-inner">
+        <div class="wb-section-label">🗺️ How It Works</div>
+        <h2 contenteditable="true" style="font-size:22px;font-weight:800;margin-bottom:20px;text-align:center;">How We Work Together</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;text-align:center;">
+          <div style="padding:16px;background:var(--grey-50);border-radius:12px;">
+            <div style="font-size:32px;margin-bottom:8px;">💬</div>
+            <div contenteditable="true" style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">1. Free Discovery Call</div>
+            <div contenteditable="true" style="font-size:12px;color:var(--grey-500);line-height:1.6;">We chat for 20 minutes to see if we're the right fit — no pressure, no commitment.</div>
+          </div>
+          <div style="padding:16px;background:var(--grey-50);border-radius:12px;">
+            <div style="font-size:32px;margin-bottom:8px;">📋</div>
+            <div contenteditable="true" style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">2. Deep-Dive Consultation</div>
+            <div contenteditable="true" style="font-size:12px;color:var(--grey-500);line-height:1.6;">A thorough 90-minute initial session covering your full health history, symptoms, and goals.</div>
+          </div>
+          <div style="padding:16px;background:var(--grey-50);border-radius:12px;">
+            <div style="font-size:32px;margin-bottom:8px;">✨</div>
+            <div contenteditable="true" style="font-size:14px;font-weight:700;color:var(--charcoal);margin-bottom:6px;">3. Your Personalised Plan</div>
+            <div contenteditable="true" style="font-size:12px;color:var(--grey-500);line-height:1.6;">You receive a bespoke nutrition and lifestyle plan, with ongoing support as you implement it.</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  } else if (type === 'quote') {
+    html = `<div class="wb-section wb-quote" style="background:linear-gradient(135deg,var(--charcoal),#3d3f5a);border-radius:12px;">
+      <div class="wb-controls">
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;color:#ef4444!important;border-color:#fca5a5!important;" onclick="removeWbSection(this)">✕ Remove</button>
+      </div>
+      <div class="wb-inner" style="text-align:center;padding:40px 32px;">
+        <div style="font-size:40px;color:rgba(255,255,255,0.3);margin-bottom:12px;">"</div>
+        <p contenteditable="true" style="font-size:22px;font-weight:700;color:#fff;line-height:1.4;max-width:560px;margin:0 auto 16px;">Your health is not a luxury — it is the foundation everything else is built on.</p>
+        <div contenteditable="true" style="font-size:13px;color:rgba(255,255,255,0.6);">— Your Name</div>
+      </div>
+    </div>`;
+  } else if (type === 'newsletter') {
+    html = `<div class="wb-section wb-newsletter" style="background:#F5F3FF;border:1px solid var(--grey-200);border-radius:12px;">
+      <div class="wb-controls">
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;color:#ef4444!important;border-color:#fca5a5!important;" onclick="removeWbSection(this)">✕ Remove</button>
+      </div>
+      <div class="wb-inner" style="text-align:center;">
+        <div class="wb-section-label">✉️ Newsletter Sign-up</div>
+        <h2 contenteditable="true" style="font-size:22px;font-weight:800;margin-bottom:8px;color:var(--charcoal);">Get Weekly Wellness Tips</h2>
+        <p contenteditable="true" style="font-size:14px;color:var(--grey-600);margin-bottom:20px;max-width:400px;margin-left:auto;margin-right:auto;">Practical advice on nutrition, energy, and feeling your best — straight to your inbox.</p>
+        <div style="display:flex;gap:8px;max-width:380px;margin:0 auto;">
+          <input type="email" placeholder="your@email.com" style="flex:1;padding:10px 14px;border:1px solid var(--grey-300);border-radius:8px;font-size:13px;">
+          <button class="btn btn-primary" style="white-space:nowrap;">Subscribe</button>
+        </div>
+        <div style="font-size:11px;color:var(--grey-400);margin-top:8px;">No spam. Unsubscribe any time.</div>
+      </div>
+    </div>`;
+  } else if (type === 'gallery') {
+    const galleryImgs = [
+      'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80',
+      'https://images.unsplash.com/photo-1545389336-cf090694435e?w=400&q=80',
+      'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=400&q=80',
+      'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80',
+      'https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=400&q=80',
+      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80'
+    ];
+    html = `<div class="wb-section wb-gallery" style="border:1px solid var(--grey-200);">
+      <div class="wb-controls">
+        <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;color:#ef4444!important;border-color:#fca5a5!important;" onclick="removeWbSection(this)">✕ Remove</button>
+      </div>
+      <div class="wb-inner">
+        <div class="wb-section-label">🌿 Gallery</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          ${galleryImgs.map(u => `<img src="${u}" style="width:100%;height:130px;object-fit:cover;border-radius:10px;display:block;" onclick="cycleWbImage(this)">`).join('')}
+        </div>
+        <div style="font-size:10px;color:var(--grey-400);margin-top:8px;text-align:center;">Click any image to cycle options · Photos from Unsplash</div>
+      </div>
+    </div>`;
+  }
+
+  if (!html) return;
+  const div = document.createElement('div');
+  div.innerHTML = html.trim();
+  wbContact.parentNode.insertBefore(div.firstChild, wbContact);
+  showToast('Section added — scroll up to see it');
+}
+
+function removeWbSection(btn) {
+  const section = btn.closest('.wb-section');
+  if (section) {
+    section.remove();
+    showToast('Section removed');
+  }
+}
+
+function addWbTestimonial() {
+  const grid = document.querySelector('.wb-testimonial-grid');
+  if (!grid) return;
+  const t = document.createElement('div');
+  t.className = 'wb-testimonial';
+  t.innerHTML = `<div class="stars">★★★★★</div>
+    <p contenteditable="true">"Click to write a testimonial from a happy client."</p>
+    <div class="author" contenteditable="true">— Name, Location</div>`;
+  grid.appendChild(t);
+  showToast('Testimonial added — click the text to edit it');
+}
+
+// Image cycling for strips and gallery
+const WB_CYCLE_IMGS = [
+  'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&q=80',
+  'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80',
+  'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&q=80',
+  'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80',
+  'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
+  'https://images.unsplash.com/photo-1545389336-cf090694435e?w=600&q=80',
+  'https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=600&q=80',
+  'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=600&q=80',
+  'https://images.unsplash.com/photo-1526676037777-05a232554f77?w=600&q=80',
+  'https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=600&q=80'
+];
+
+function cycleWbImage(img) {
+  const cur = img.src;
+  const baseUrls = WB_CYCLE_IMGS.map(u => u.split('?')[0]);
+  const curBase = cur.split('?')[0];
+  const idx = baseUrls.findIndex(b => cur.includes(b.split('photo-')[1]));
+  const next = WB_CYCLE_IMGS[(idx + 1) % WB_CYCLE_IMGS.length];
+  img.src = next;
+  showToast('Image changed — keep clicking to cycle through options');
+}
+
+function swapWbImages(btn) {
+  const strip = btn.closest('.wb-section');
+  const imgs = strip ? strip.querySelectorAll('img') : [];
+  imgs.forEach(img => {
+    const cur = img.src;
+    const idx = WB_CYCLE_IMGS.findIndex(u => cur.includes(u.split('photo-')[1]?.split('?')[0] || ''));
+    const next = WB_CYCLE_IMGS[(idx + 1) % WB_CYCLE_IMGS.length];
+    img.src = next;
+  });
+  showToast('Images swapped');
+}
+
 
 </script>
 
@@ -8485,6 +8803,50 @@ function refreshWebsiteFromProfile() {
 
 <!-- ROB — Help Panel -->
 <div id="rob-panel" style="display:none;position:fixed;bottom:96px;right:28px;z-index:8000;width:320px;max-height:480px;overflow-y:auto;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.18);padding:20px;flex-direction:column;"></div>
+
+<!-- WB: Add Section Modal -->
+<div id="wb-add-section-modal" class="wb-add-section-modal" onclick="if(event.target===this)closeAddSectionModal()">
+  <div style="background:#fff;border-radius:18px;padding:28px;width:min(520px,94vw);box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div style="font-size:17px;font-weight:800;color:var(--charcoal);">Add a Section</div>
+      <button onclick="closeAddSectionModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--grey-400);line-height:1;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--grey-500);margin-bottom:16px;">Choose what to add to your website</div>
+    <div class="wb-add-section-grid">
+      <button class="wb-add-section-opt" onclick="addWbSection('images')">
+        <div class="opt-icon">🖼️</div>
+        <div class="opt-title">Image Strip</div>
+        <div class="opt-sub">3 photos to break up content — swap for your own</div>
+      </button>
+      <button class="wb-add-section-opt" onclick="addWbSection('faq')">
+        <div class="opt-icon">❓</div>
+        <div class="opt-title">FAQ</div>
+        <div class="opt-sub">Answer common questions clients ask</div>
+      </button>
+      <button class="wb-add-section-opt" onclick="addWbSection('process')">
+        <div class="opt-icon">🗺️</div>
+        <div class="opt-title">How It Works</div>
+        <div class="opt-sub">3-step process — what clients can expect</div>
+      </button>
+      <button class="wb-add-section-opt" onclick="addWbSection('quote')">
+        <div class="opt-icon">💬</div>
+        <div class="opt-title">Pull Quote</div>
+        <div class="opt-sub">A bold statement or philosophy you stand by</div>
+      </button>
+      <button class="wb-add-section-opt" onclick="addWbSection('newsletter')">
+        <div class="opt-icon">✉️</div>
+        <div class="opt-title">Email Sign-up</div>
+        <div class="opt-sub">Capture leads with a newsletter opt-in</div>
+      </button>
+      <button class="wb-add-section-opt" onclick="addWbSection('gallery')">
+        <div class="opt-icon">🌿</div>
+        <div class="opt-title">Gallery / Mood</div>
+        <div class="opt-sub">Wellness imagery to set the tone</div>
+      </button>
+    </div>
+  </div>
+</div>
+
 
 </body>
 </html>
