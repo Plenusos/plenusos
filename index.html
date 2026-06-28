@@ -162,10 +162,16 @@ textarea{resize:vertical;min-height:90px;}
 .wb-btn-secondary{background:rgba(255,255,255,0.15);color:#fff;padding:12px 24px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;border:1px solid rgba(255,255,255,0.3);}
 .wb-about{background:#fff;}
 .wb-services{background:var(--grey-50);}
-.wb-service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px;}
-.wb-service-card{background:#fff;border:1px solid var(--grey-200);border-radius:10px;padding:16px;}
-.wb-service-card h4{font-size:14px;font-weight:700;margin:8px 0 4px;}
-.wb-service-card p{font-size:12px;color:var(--grey-500);}
+.wb-service-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;margin-top:16px;}
+.wb-service-card{background:#fff;border:1px solid var(--grey-200);border-radius:14px;padding:20px;display:flex;flex-direction:column;transition:box-shadow 0.2s;}
+.wb-service-card:hover{box-shadow:0 4px 20px rgba(44,0,203,0.10);}
+.wb-service-card h4{font-size:15px;font-weight:800;margin:10px 0 6px;color:var(--charcoal);}
+.wb-service-card p{font-size:12.5px;color:var(--grey-500);line-height:1.6;flex:1;}
+.wb-service-card .svc-meta{font-size:11px;color:var(--grey-400);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;}
+.wb-service-card .svc-meta span{background:#f5f3ff;color:#5B21B6;border-radius:20px;padding:2px 8px;font-weight:600;}
+.wb-service-card .svc-price{margin-top:12px;font-size:16px;font-weight:900;color:var(--violet);}
+.wb-service-card .svc-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.wb-service-card .svc-badge{font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid;font-weight:600;}
 .wb-testimonials{background:#fff;}
 .wb-testimonial-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
 .wb-testimonial{background:var(--grey-50);border-radius:10px;padding:16px;}
@@ -221,8 +227,7 @@ textarea{resize:vertical;min-height:90px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Firebase Auth (compat SDK v9 via jsDelivr) -->
-<script src="https://cdn.jsdelivr.net/npm/firebase@9.23.0/firebase-app-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/firebase@9.23.0/firebase-auth-compat.js"></script>
+<!-- Firebase removed — auth now handled by Supabase (no googleapis dependency) -->
 </head>
 <body>
 
@@ -690,35 +695,46 @@ textarea{resize:vertical;min-height:90px;}
             </div>
             <div id="sp-body-2" style="display:none;padding:0 20px 20px;border-top:1px solid var(--grey-100);">
               <div style="height:14px;"></div>
-              <div class="grid-2">
-                <div class="form-group">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;">
+                <div class="form-group" style="margin-bottom:0;">
                   <label>Primary colour</label>
-                  <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="color" id="brand-primary-color" value="#2C00CB" style="width:44px;height:36px;padding:2px;border-radius:8px;cursor:pointer;border:1px solid var(--grey-300);">
-                    <input type="text" id="brand-primary-hex" value="#2C00CB" style="flex:1;" oninput="document.getElementById('brand-primary-color').value=this.value">
+                  <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+                    <input type="color" id="brand-primary-color" value="#2C00CB" style="width:44px;height:36px;padding:2px;border-radius:8px;cursor:pointer;border:1px solid var(--grey-300);" oninput="document.getElementById('brand-primary-hex').value=this.value">
+                    <input type="text" id="brand-primary-hex" value="#2C00CB" style="flex:1;font-size:12px;" oninput="document.getElementById('brand-primary-color').value=this.value">
                   </div>
-                  <div style="font-size:11px;color:var(--grey-400);margin-top:4px;">Used for buttons, headings, and brand accents</div>
+                  <div style="font-size:11px;color:var(--grey-400);margin-top:4px;">Buttons, headings, key accents</div>
                 </div>
-                <div class="form-group">
-                  <label>Secondary colour</label>
-                  <div style="display:flex;gap:8px;align-items:center;">
-                    <input type="color" id="brand-secondary-color" value="#0B1538" style="width:44px;height:36px;padding:2px;border-radius:8px;cursor:pointer;border:1px solid var(--grey-300);">
-                    <input type="text" id="brand-secondary-hex" value="#0B1538" style="flex:1;" oninput="document.getElementById('brand-secondary-color').value=this.value">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Accent colour</label>
+                  <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+                    <input type="color" id="brand-accent-color" value="#8F61F7" style="width:44px;height:36px;padding:2px;border-radius:8px;cursor:pointer;border:1px solid var(--grey-300);" oninput="document.getElementById('brand-accent-hex').value=this.value">
+                    <input type="text" id="brand-accent-hex" value="#8F61F7" style="flex:1;font-size:12px;" oninput="document.getElementById('brand-accent-color').value=this.value">
                   </div>
+                  <div style="font-size:11px;color:var(--grey-400);margin-top:4px;">Highlights, chips, badges</div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>Background colour</label>
+                  <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+                    <input type="color" id="brand-bg-color" value="#F5F3FF" style="width:44px;height:36px;padding:2px;border-radius:8px;cursor:pointer;border:1px solid var(--grey-300);" oninput="document.getElementById('brand-bg-hex').value=this.value">
+                    <input type="text" id="brand-bg-hex" value="#F5F3FF" style="flex:1;font-size:12px;" oninput="document.getElementById('brand-bg-color').value=this.value">
+                  </div>
+                  <div style="font-size:11px;color:var(--grey-400);margin-top:4px;">Page backgrounds, cards</div>
+                </div>
+              </div>
+              <div class="grid-2" style="margin-bottom:14px;">
+                <div class="form-group" style="margin-bottom:0;">
                   <label>Brand font</label>
-                  <select>
-                    <option>Segoe UI — clean and modern</option>
-                    <option>Inter — sharp and minimal</option>
-                    <option>Playfair Display — elegant and premium</option>
-                    <option>Lato — warm and approachable</option>
-                    <option>Merriweather — trustworthy and classic</option>
+                  <select id="brand-font-select">
+                    <option value="inter">Inter — sharp and minimal</option>
+                    <option value="playfair-inter">Playfair Display + Inter — classic &amp; refined</option>
+                    <option value="montserrat-open">Montserrat + Open Sans — modern &amp; approachable</option>
+                    <option value="cormorant-lato">Cormorant Garamond + Lato — warm &amp; literary</option>
+                    <option value="dm-serif-dm-sans">DM Serif + DM Sans — bold &amp; contemporary</option>
                   </select>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom:0;">
                   <label>Your logo</label>
-                  <input type="file" accept="image/*" style="padding:6px;">
+                  <input type="file" accept="image/*" style="padding:6px;" onchange="uploadSettingsLogo(this)">
                   <div style="font-size:11px;color:var(--grey-400);margin-top:4px;">PNG or SVG, transparent background recommended</div>
                 </div>
               </div>
@@ -962,7 +978,7 @@ textarea{resize:vertical;min-height:90px;}
               <input type="file" id="wb-logo-input" accept="image/*" style="display:none;" onchange="uploadWbLogo(this)">
             </div>
             <div>
-              <div contenteditable="true" id="wb-site-name" style="font-size:15px;font-weight:800;color:var(--charcoal);">${(PROFILE&&PROFILE.practice_name)||'Your Business Name'}</div>
+              <div contenteditable="true" id="wb-site-name" style="font-size:15px;font-weight:800;color:var(--charcoal);">Your Business Name</div>
               <div style="font-size:10px;color:var(--grey-400);margin-top:1px;">Tap logo to upload · tap name to edit</div>
             </div>
           </div>
@@ -977,30 +993,50 @@ textarea{resize:vertical;min-height:90px;}
 
         <!-- HERO SECTION -->
         <div class="wb-section wb-hero" style="position:relative;overflow:hidden;">
-          <div class="wb-controls">
+          <div class="wb-controls" style="flex-wrap:wrap;gap:6px;">
             <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="aiWriteSection('hero')">✨ AI Rewrite</button>
-            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="document.getElementById('wb-hero-bg-input').click()">🖼️ Hero Image</button>
+            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="toggleHeroImagePicker()">🖼️ Background Image</button>
+            <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;" onclick="document.getElementById('wb-hero-bg-input').click()">📁 Upload Own</button>
+          </div>
+          <!-- Free image picker -->
+          <div id="wb-img-picker" style="display:none;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;margin-bottom:8px;">
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:8px;letter-spacing:0.5px;">FREE BACKGROUND IMAGES — click to use</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+              ${[
+                {url:'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=900&q=80',label:'Healthy Food'},
+                {url:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=900&q=80',label:'Salad Bowl'},
+                {url:'https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=900&q=80',label:'Nutrition'},
+                {url:'https://images.unsplash.com/photo-1544025162-d76694265947?w=900&q=80',label:'Wellness'},
+                {url:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=900&q=80',label:'Health'},
+                {url:'https://images.unsplash.com/photo-1545389336-cf090694435e?w=900&q=80',label:'Calm'},
+                {url:'https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=900&q=80',label:'Fresh Food'},
+                {url:'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=900&q=80',label:'Natural'}
+              ].map(img => `<div onclick="setHeroBgUrl('${img.url}')" style="cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid transparent;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='transparent'">
+                <img src="${img.url.replace('w=900','w=200')}" style="width:100%;height:60px;object-fit:cover;display:block;">
+                <div style="font-size:9px;color:rgba(255,255,255,0.7);text-align:center;padding:2px 0;">${img.label}</div>
+              </div>`).join('')}
+            </div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:6px;">Photos from Unsplash — free for use</div>
           </div>
           <!-- Hero background image overlay -->
           <div id="wb-hero-bg-overlay" style="display:none;position:absolute;inset:0;background-size:cover;background-position:center;z-index:0;opacity:0.15;pointer-events:none;"></div>
           <input type="file" id="wb-hero-bg-input" accept="image/*" style="display:none;" onchange="uploadWbHeroBg(this)">
           <div class="wb-inner" style="position:relative;z-index:1;">
             <div style="font-size:11px;font-weight:700;letter-spacing:1px;opacity:0.6;margin-bottom:8px;text-transform:uppercase;">Hero Section — click to edit</div>
-            <h1 contenteditable="true" id="wb-hero-h1">Transform Your Health With Expert Nutritional Therapy</h1>
-            <p contenteditable="true" id="wb-hero-p">I help busy women overcome fatigue, bloating, and hormonal imbalances through personalised nutrition plans rooted in clinical science — and real food you'll actually enjoy.</p>
+            <h1 contenteditable="true" id="wb-hero-h1">Your headline goes here</h1>
+            <p contenteditable="true" id="wb-hero-p">Use the ✨ AI Rewrite button above to generate your headline and tagline from your wizard answers, or click here to type your own.</p>
             <div class="wb-cta-row">
               <button class="wb-btn-primary" contenteditable="true">Book a Free Discovery Call</button>
               <button class="wb-btn-secondary" contenteditable="true">Learn How It Works</button>
             </div>
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.3);display:flex;gap:20px;flex-wrap:wrap;">
-              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.8);">
-                <span>⭐</span><span contenteditable="true">5.0 Google Reviews</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.8);">
-                <span>🎓</span><span contenteditable="true">mBANT, CNHC Registered</span>
-              </div>
+            <div id="wb-trust-bar" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.3);display:flex;gap:20px;flex-wrap:wrap;">
               <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.8);">
                 <span>💬</span><span contenteditable="true">Free discovery call available</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.8);">
+                <span>📍</span><span id="wb-trust-location" contenteditable="true">UK-based</span>
+              </div>
+              <div id="wb-trust-quals" style="display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.8);">
               </div>
             </div>
           </div>
@@ -1024,13 +1060,9 @@ textarea{resize:vertical;min-height:90px;}
                 </div>
               </div>
               <div style="flex:1;">
-                <h2 contenteditable="true" style="font-size:22px;font-weight:800;margin-bottom:8px;" id="wb-about-h">Hi, I'm Helen — Nutritional Therapist &amp; Gut Health Specialist</h2>
-                <p contenteditable="true" style="font-size:14px;color:var(--grey-600);line-height:1.7;" id="wb-about-p">I'm a registered nutritional therapist (mBANT, CNHC) with a passion for helping women feel energised, balanced, and in control of their health. After struggling with my own gut issues for years, I found the transformative power of food as medicine — and I've dedicated my career to sharing that with my clients.</p>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
-                  <div style="padding:6px 12px;background:#F5F3FF;border-radius:20px;font-size:11px;color:var(--violet);font-weight:600;" contenteditable="true">mBANT Registered</div>
-                  <div style="padding:6px 12px;background:#F5F3FF;border-radius:20px;font-size:11px;color:var(--violet);font-weight:600;" contenteditable="true">CNHC Registered</div>
-                  <div style="padding:6px 12px;background:#F5F3FF;border-radius:20px;font-size:11px;color:var(--violet);font-weight:600;" contenteditable="true">10+ Years Experience</div>
-                </div>
+                <h2 contenteditable="true" style="font-size:22px;font-weight:800;margin-bottom:8px;" id="wb-about-h">Hi, I'm [Your Name]</h2>
+                <p contenteditable="true" style="font-size:14px;color:var(--grey-600);line-height:1.7;" id="wb-about-p">Click ✨ AI Rewrite to generate your About section from your wizard answers, or tap here to write your own story.</p>
+                <div id="wb-quals-chips" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;"></div>
               </div>
             </div>
           </div>
@@ -2163,8 +2195,8 @@ textarea{resize:vertical;min-height:90px;}
 // ============================================================
 
 let sb = null;           // Supabase client (data only — auth handled by Firebase)
-let fbAuth = null;       // Firebase Auth instance
-let currentUser = null;  // Authenticated user (Firebase user object)
+let fbAuth = null;       // Retained for legacy references — unused after Supabase auth migration
+let currentUser = null;  // Authenticated user
 let PROFILE = {};        // Loaded from practitioner_profiles table
 let wzStep = 1;          // Wizard current step (1-based)
 let wzData = {};         // Wizard data being collected
@@ -2193,49 +2225,35 @@ const PAGE_TITLES = {
 async function init() {
   fixDates();
 
-  // Initialise Firebase Auth
-  if (typeof firebase === 'undefined') {
-    showScreen('auth');
-    setTimeout(() => showAuthError('Could not load authentication — please refresh the page.'), 300);
-    return;
-  }
-  const firebaseConfig = {
-    apiKey:            "AIzaSyDLxRyBNO0E2Yc4j2LukUtk2jJs57vbJIs",
-    authDomain:        "plenusos.firebaseapp.com",
-    projectId:         "plenusos",
-    storageBucket:     "plenusos.firebasestorage.app",
-    messagingSenderId: "697981566089",
-    appId:             "1:697981566089:web:4f95ef4c701775c814da58"
-  };
+  // Initialise Supabase (handles BOTH auth and data — no googleapis dependency)
   try {
-    const fbApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
-    fbAuth = firebase.auth(fbApp);
-
-    // Also init Supabase for data (profile, clients etc.) — auth handled by Firebase
-    try {
-      const sbUrl = 'https://klnmqsfpxlhmzymwunci.supabase.co';
-      const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtsbm1xc2ZweGxobXp5bXd1bmNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjM1NzQsImV4cCI6MjA5Nzc5OTU3NH0.uaM5wesAyrqP1KAtKwMwzH8E2KH7Y85fQ2sZQqPww8I';
-      sb = window.supabase.createClient(sbUrl, sbKey);
-    } catch(e) { sb = null; } // Non-fatal — localStorage is primary
-
-    // Firebase auth state listener — instant, no cold start
-    fbAuth.onAuthStateChanged(async (user) => {
-      if (user) {
-        currentUser = user;
-        await loadProfile();
-      } else {
-        currentUser = null;
-        PROFILE = {};
-        showScreen('auth');
-      }
-    });
-
+    const sbUrl = 'https://klnmqsfpxlhmzymwunci.supabase.co';
+    const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtsbm1xc2ZweGxobXp5bXd1bmNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjM1NzQsImV4cCI6MjA5Nzc5OTU3NH0.uaM5wesAyrqP1KAtKwMwzH8E2KH7Y85fQ2sZQqPww8I';
+    sb = window.supabase.createClient(sbUrl, sbKey);
   } catch(e) {
     showScreen('auth');
-    setTimeout(() => {
-      showAuthError('Connection problem: ' + e.message + '. Please refresh the page.');
-    }, 300);
+    setTimeout(() => showAuthError('Could not connect — please refresh the page.'), 300);
+    return;
   }
+
+  // Supabase auth state listener — persists session automatically via localStorage
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      // User arrived via a password-reset link — show the set-new-password overlay
+      document.getElementById('overlay-reset-password').style.display = 'flex';
+      return;
+    }
+    if (session && session.user) {
+      const user = session.user;
+      user.uid = user.id; // backward-compat shim — all existing code uses currentUser.uid
+      currentUser = user;
+      await loadProfile();
+    } else {
+      currentUser = null;
+      PROFILE = {};
+      showScreen('auth');
+    }
+  });
 }
 
 function showScreen(screen) {
@@ -2312,18 +2330,20 @@ async function signIn() {
   const password = document.getElementById('auth-password').value;
   clearAuthError();
   if (!email || !password) { showAuthError('Please enter your email address and password.'); return; }
-  if (!fbAuth) { showAuthError('Authentication not ready — please refresh the page.'); return; }
   const btn = document.getElementById('btn-signin');
   if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
   try {
-    await fbAuth.signInWithEmailAndPassword(email, password);
-    // onAuthStateChanged handles success automatically
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    // onAuthStateChange handles success automatically
   } catch(e) {
-    const msg = (e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential')
+    const msg = (e.message && e.message.toLowerCase().includes('invalid'))
       ? 'Email or password is incorrect. Please check and try again.'
-      : (e.code === 'auth/too-many-requests')
-      ? 'Too many attempts — please wait a moment and try again.'
-      : 'Sign-in error: ' + e.message;
+      : (e.message && e.message.toLowerCase().includes('rate'))
+      ? 'Too many attempts — please wait a few minutes and try again.'
+      : (e.message && e.message.toLowerCase().includes('email not confirmed'))
+      ? 'Please check your email and click the confirmation link before signing in.'
+      : 'Sign-in error: ' + (e.message || 'please try again.');
     showAuthError(msg);
     if (btn) { btn.disabled = false; btn.textContent = 'Sign in →'; }
   }
@@ -2347,22 +2367,30 @@ async function signUp() {
   if (!email || !password) { showRegErr('Please enter your email address and password.'); return; }
   if (password !== confirm) { showRegErr('Passwords do not match — please try again.'); return; }
   if (password.length < 8)  { showRegErr('Password must be at least 8 characters.'); return; }
-  if (!fbAuth) { showRegErr('Authentication not ready — please refresh the page.'); return; }
 
   const btn = document.getElementById('btn-register');
   if (btn) { btn.disabled = true; btn.textContent = 'Creating account…'; }
 
   try {
-    await fbAuth.createUserWithEmailAndPassword(email, password);
-    // onAuthStateChanged fires automatically on success — no further action needed
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if (error) throw error;
+    // Supabase may require email confirmation depending on project settings
+    // If session is returned immediately, onAuthStateChange fires and logs in
+    if (!data.session) {
+      showRegErr('');
+      const el = document.getElementById('auth-register-error');
+      if (el) { el.style.color = '#16a34a'; el.textContent = '✅ Account created — check your email to confirm, then sign in.'; el.style.display = 'block'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Create account →'; }
+    }
+    // If session exists, onAuthStateChange handles it automatically
   } catch(e) {
-    const msg = e.code === 'auth/email-already-in-use'
+    const msg = (e.message && e.message.toLowerCase().includes('already registered'))
       ? 'An account with this email already exists — please sign in instead.'
-      : e.code === 'auth/weak-password'
+      : (e.message && e.message.toLowerCase().includes('weak'))
       ? 'Password is too weak — please use at least 8 characters.'
-      : e.code === 'auth/invalid-email'
+      : (e.message && e.message.toLowerCase().includes('invalid email'))
       ? 'Please enter a valid email address.'
-      : 'Could not create account: ' + e.message;
+      : 'Could not create account: ' + (e.message || 'please try again.');
     showRegErr(msg);
     if (btn) { btn.disabled = false; btn.textContent = 'Create account →'; }
   }
@@ -2370,7 +2398,7 @@ async function signUp() {
 
 async function signOut() {
   if (currentUser) await logAudit('logout', null, null, null);
-  if (fbAuth) await fbAuth.signOut();
+  await sb.auth.signOut();
   currentUser = null;
   PROFILE     = {};
   showScreen('auth');
@@ -2379,15 +2407,12 @@ async function signOut() {
 async function resetPassword() {
   const email = document.getElementById('auth-email').value.trim();
   if (!email) { showToast('Enter your email address first'); return; }
-  if (!fbAuth) { showToast('Authentication not ready — please refresh.'); return; }
   try {
-    await fbAuth.sendPasswordResetEmail(email);
-    showToast('✅ Password reset email sent — check your inbox');
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+    if (error) throw error;
+    showToast('✅ Password reset email sent — check your inbox and click the link');
   } catch(e) {
-    const msg = e.code === 'auth/user-not-found'
-      ? 'No account found with that email address.'
-      : 'Could not send reset email: ' + e.message;
-    showToast('❌ ' + msg);
+    showToast('❌ Could not send reset email: ' + (e.message || 'please try again.'));
   }
 }
 
@@ -2412,16 +2437,15 @@ async function setNewPassword() {
   if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
 
   try {
-    const user = fbAuth ? fbAuth.currentUser : null;
-    if (!user) { errDiv.textContent = 'Session expired — please sign in again.'; errDiv.style.display = 'block'; return; }
-    await user.updatePassword(newPw);
+    const { error } = await sb.auth.updateUser({ password: newPw });
+    if (error) throw error;
     // Success — hide overlay, load the app
     document.getElementById('overlay-reset-password').style.display = 'none';
     showToast('✅ Password updated! Welcome back.');
-    currentUser = user;
+    // currentUser already set by onAuthStateChange — just load profile
     await loadProfile();
   } catch(e) {
-    errDiv.textContent = 'An error occurred: ' + e.message;
+    errDiv.textContent = 'An error occurred: ' + (e.message || 'please try again.');
     errDiv.style.display = 'block';
     if (btn) { btn.disabled = false; btn.innerHTML = 'Set password &amp; sign in →'; }
   }
@@ -2440,9 +2464,24 @@ async function loadProfile() {
   let data = null;
   if (sb) {
     try {
-      const result = await sb.from('practitioner_profiles').select('*').eq('id', currentUser.uid).single();
-      if (!result.error) data = result.data;
-      else if (result.error.code !== 'PGRST116') console.warn('Profile load:', result.error.message);
+      // Primary lookup: by ID (Supabase auth UID)
+      let result = await sb.from('practitioner_profiles').select('*').eq('id', currentUser.uid).single();
+      if (!result.error) {
+        data = result.data;
+      } else if (result.error.code === 'PGRST116') {
+        // Not found by ID — fall back to email (migration path from old Firebase auth)
+        const emailResult = await sb.from('practitioner_profiles').select('*').eq('email', currentUser.email).single();
+        if (!emailResult.error && emailResult.data) {
+          data = emailResult.data;
+          // Silently update the ID to the current Supabase auth UID so future lookups work by ID
+          try {
+            await sb.from('practitioner_profiles').update({ id: currentUser.uid }).eq('email', currentUser.email);
+            data.id = currentUser.uid;
+          } catch(migErr) { console.warn('ID migration non-fatal:', migErr); }
+        }
+      } else {
+        console.warn('Profile load:', result.error.message);
+      }
     } catch(e) { console.warn('Profile load exception:', e); }
   }
 
@@ -2629,6 +2668,30 @@ function applyProfileToUI() {
   updateAIPrompts();
 }
 
+// ── Helper: save to practitioner_profiles regardless of whether the row
+//    has the Firebase UID or the new Supabase auth UID as its primary key.
+//    1. Try update by current UID
+//    2. Fall back to update by email (catches migrated-but-not-rekeyed rows)
+//    3. If no row at all, insert fresh
+async function profileSave(updates) {
+  if (!sb || !currentUser) return { error: { message: 'Not signed in' } };
+  const uid   = currentUser.uid;
+  const email = currentUser.email;
+  updates.updated_at = new Date().toISOString();
+
+  // Step 1 — try update by UID
+  const upd1 = await sb.from('practitioner_profiles').update(updates).eq('id', uid).select('id');
+  if (!upd1.error && upd1.data && upd1.data.length > 0) return { error: null };
+
+  // Step 2 — try update by email (row has old Firebase UID)
+  const upd2 = await sb.from('practitioner_profiles').update({ ...updates, id: uid }).eq('email', email).select('id');
+  if (!upd2.error && upd2.data && upd2.data.length > 0) return { error: null };
+
+  // Step 3 — no row exists yet, insert fresh
+  const ins = await sb.from('practitioner_profiles').insert({ ...updates, id: uid, email });
+  return { error: ins.error || null };
+}
+
 async function saveProfileSettings() {
   if (!sb || !currentUser) { showToast('Not signed in'); return; }
 
@@ -2642,9 +2705,7 @@ async function saveProfileSettings() {
     updated_at:     new Date().toISOString()
   };
 
-  updates.id = currentUser.uid;
-  updates.email = updates.email || currentUser.email;
-  const { error } = await sb.from('practitioner_profiles').upsert(updates, { onConflict: 'id' });
+  const { error } = await profileSave(updates);
 
   if (error) {
     showToast('❌ Error saving: ' + error.message);
@@ -2669,9 +2730,7 @@ async function saveIntegrations() {
   if (stripeVal && !stripeVal.startsWith('•')) updates.stripe_publishable_key = stripeVal;
   if (paypalVal && !paypalVal.startsWith('•')) updates.paypal_client_id       = paypalVal;
 
-  updates.id = currentUser.uid;
-  updates.email = updates.email || currentUser.email;
-  const { error } = await sb.from('practitioner_profiles').upsert(updates, { onConflict: 'id' });
+  const { error } = await profileSave(updates);
 
   if (error) {
     showToast('❌ Error saving: ' + error.message);
@@ -2701,17 +2760,23 @@ const AVAIL_DAYS = [
 let AVAILABILITY = {}; // keyed by day_of_week
 
 async function loadAvailability() {
-  if (!sb || !currentUser) return;
-  const { data, error } = await sb
-    .from('availability')
-    .select('*')
-    .eq('practitioner_id', currentUser.uid);
-  if (error) { console.error('loadAvailability:', error); return; }
-  AVAILABILITY = {};
-  (data || []).forEach(row => { AVAILABILITY[row.day_of_week] = row; });
+  // Always render rows immediately so UI is never blank
   renderAvailabilityRows();
-  // Pre-populate from wizard data if Supabase has nothing
-  if (!data || data.length === 0) { loadAvailabilityFromWizard(); }
+  if (!sb || !currentUser) return;
+  try {
+    const { data, error } = await sb
+      .from('availability')
+      .select('*')
+      .eq('practitioner_id', currentUser.uid);
+    if (error) { console.warn('loadAvailability:', error.message); return; }
+    if (data && data.length > 0) {
+      AVAILABILITY = {};
+      data.forEach(row => { AVAILABILITY[row.day_of_week] = row; });
+      renderAvailabilityRows();
+    } else {
+      loadAvailabilityFromWizard();
+    }
+  } catch(e) { console.warn('loadAvailability error:', e); }
 }
 
 function renderAvailabilityRows() {
@@ -2755,10 +2820,7 @@ async function wizardSaveProgress() {
   // SECONDARY: update step counter in Supabase (non-critical)
   if (sb) {
     try {
-      await sb.from('practitioner_profiles').upsert({
-        id: currentUser.uid, email: currentUser.email,
-        wizard_step: wzStep, updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
+      await profileSave({ wizard_step: wzStep });
     } catch(e) { /* non-critical */ }
   }
 }
@@ -4506,7 +4568,7 @@ async function saveWizardProgress() {
       'ic_age_range','ic_age_range_custom','ic_gender','ic_gender_custom','ic_life_stage','ic_income','ic_struggle','ic_tried',
       'ic_trigger','ic_goal','ic_blocker','ic_channels'];
     wdFields.forEach(f => { if (wzData[f] !== undefined && wzData[f] !== null) payload[f] = wzData[f]; });
-    const { error } = await sb.from('practitioner_profiles').upsert(payload, { onConflict: 'id' });
+    const { error } = await profileSave(payload);
     if (error) console.warn('Supabase wizard save (non-critical):', error.message);
   } catch(e) {
     console.warn('Supabase save exception (non-critical):', e);
@@ -5307,7 +5369,10 @@ function getWizardStepHTML(step) {
       <div id="wz-services-list">
         ${(wzData.services && wzData.services.length ? wzData.services : [{}]).map((svc, i) => `
           <div class="wz-service-card" style="border:1px solid var(--grey-200);border-radius:12px;padding:16px;margin-bottom:12px;position:relative;">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--grey-400);margin-bottom:12px;">Service ${i+1}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--grey-400);">Service ${i+1}</div>
+              <button type="button" onclick="deleteWizardService(${i})" style="background:none;border:1px solid #fca5a5;border-radius:6px;color:#ef4444;font-size:11px;font-weight:600;padding:3px 9px;cursor:pointer;line-height:1.4;" title="Remove this service">✕ Remove</button>
+            </div>
             <div class="grid-2" style="gap:10px;">
               <div class="form-group" style="margin-bottom:8px;"><label>Service name</label><input type="text" class="wz-input wz-svc-name" placeholder="${i===0?'Initial Consultation':i===1?'12-Week Programme':'Group Workshop'}" value="${svc.name||''}"></div>
               <div class="form-group" style="margin-bottom:8px;"><label>Duration</label><input type="text" class="wz-input wz-svc-duration" placeholder="${i===0?'60 mins':i===1?'12 weeks':'6 weeks'}" value="${svc.duration||''}"></div>
@@ -5334,13 +5399,10 @@ function getWizardStepHTML(step) {
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;">
               <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--grey-600);font-weight:500;cursor:pointer;">
-                <input type="checkbox" class="wz-svc-sliding-scale" ${svc.sliding_scale?'checked':''} style="accent-color:var(--violet);"> Sliding scale available
+                <input type="checkbox" class="wz-svc-sliding-scale" ${svc.sliding_scale?'checked':''} style="accent-color:var(--violet);"> Sliding scale available (evidence of income required)
               </label>
               <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--grey-600);font-weight:500;cursor:pointer;">
-                <input type="checkbox" class="wz-svc-evidence-based" ${svc.evidence_based?'checked':''} style="accent-color:var(--violet);"> Evidence-based pricing shown
-              </label>
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--grey-600);font-weight:500;cursor:pointer;">
-                <input type="checkbox" class="wz-svc-payment-plan" ${svc.payment_plan?'checked':''} style="accent-color:var(--violet);"> Payment plan available
+                <input type="checkbox" class="wz-svc-payment-plan" ${svc.payment_plan?'checked':''} style="accent-color:var(--violet);"> Payment plans available
               </label>
             </div>
           </div>`).join('')}
@@ -6133,7 +6195,7 @@ function getBrandPhaseContent(phase) {
               </div>
             </div>
             <div id="wz-custom-palette-body" style="display:${selPalette==='custom'?'block':'none'};margin-top:12px;">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
                 ${[
                   {id:'wz-custom-c1', label:'Primary colour',   idx:0, hint:'Your main brand colour — used for headings & key elements'},
                   {id:'wz-custom-c2', label:'Accent colour',    idx:1, hint:'A complementary colour for buttons & highlights'},
@@ -6676,7 +6738,6 @@ function collectWizardStep(step) {
         price:         card.querySelector('.wz-svc-price')?.value         || '',
         price_type:    card.querySelector('.wz-svc-price-type')?.value    || 'Per session',
         sliding_scale: card.querySelector('.wz-svc-sliding-scale')?.checked  || false,
-        evidence_based:card.querySelector('.wz-svc-evidence-based')?.checked || false,
         payment_plan:  card.querySelector('.wz-svc-payment-plan')?.checked   || false
       })).filter(s => s.name);
       break;
@@ -6946,7 +7007,18 @@ function addWizardService() {
   if (!wzData.services) wzData.services = [];
   // Collect any typed data from existing service cards before adding a new one
   collectWizardStep(11);
-  wzData.services.push({ name:'', duration:'', description:'', delivery:'Online', price:'', price_type:'Per session', sliding_scale:false, evidence_based:false, payment_plan:false });
+  wzData.services.push({ name:'', duration:'', description:'', delivery:'Online', price:'', price_type:'Per session', sliding_scale:false, payment_plan:false });
+  renderWizardStep();
+}
+
+function deleteWizardService(idx) {
+  if (!wzData.services || wzData.services.length <= 1) {
+    showToast('You need at least one service — clear the fields instead if you want to start fresh.');
+    return;
+  }
+  collectWizardStep(11);
+  wzData.services.splice(idx, 1);
+  debounceAutosave();
   renderWizardStep();
 }
 
@@ -7368,14 +7440,11 @@ async function completeWizard() {
       supaPayload[k] = (Array.isArray(v) || (typeof v === 'object')) ? JSON.stringify(v) : v;
     }
     try {
-      const { error } = await sb.from('practitioner_profiles').upsert(supaPayload, { onConflict: 'id' });
+      const { error } = await profileSave(supaPayload);
       if (error) {
         // Fall back to just marking wizard complete — wizard data lives in localStorage
         try {
-          await sb.from('practitioner_profiles').upsert({
-            id: currentUser.uid, email: currentUser.email,
-            wizard_complete: true, wizard_step: wzStep, updated_at: new Date().toISOString()
-          }, { onConflict: 'id' });
+          await profileSave({ wizard_complete: true, wizard_step: wzStep });
         } catch(e2) { /* non-critical — local copy is safe */ }
       }
     } catch(e) { /* non-critical — local copy is safe */ }
@@ -7746,39 +7815,35 @@ function toggleRob() {
 function renderRobPanel() {
   const tips = ROB_TIPS[robContext] || ROB_TIPS.default;
   const panel = document.getElementById('rob-panel');
+  const hasKey = (typeof CONFIG !== 'undefined') && CONFIG.claudeApiKey;
   panel.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#2C00CB,#8F61F7);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🤝</div>
         <div>
-          <div style="font-size:14px;font-weight:800;color:#0B1538;">Ask Rob</div>
-          <div style="font-size:11px;color:#6b7280;">Your PlenusOS guide</div>
+          <div style="font-size:14px;font-weight:800;color:#0B1538;">Rob — Business Coach</div>
+          <div style="font-size:11px;color:#6b7280;">${hasKey ? '✅ AI-powered · Ask me anything' : 'Ask me anything about your business'}</div>
         </div>
       </div>
       <button onclick="toggleRob()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#9ca3af;padding:4px;line-height:1;">✕</button>
     </div>
 
-    <div style="background:#f5f3ff;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#4b5563;line-height:1.5;">
-      👋 Hi! I'm Rob. Ask me anything about your business — pricing, marketing, clients, positioning. I'm here to help.
-    </div>
-    ${!(typeof CONFIG !== 'undefined' && CONFIG.claudeApiKey) ? `<div style="background:#FEF9C3;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:#92400E;line-height:1.5;">⚡ Add your Claude API key in <strong>Settings → Integrations</strong> to make me AI-powered — I'll give much more personalised answers.</div>` : ''}
-
-    <div style="margin-bottom:16px;">
-      <div style="display:flex;gap:8px;">
-        <input type="text" id="rob-question-input" placeholder="Ask Rob anything…" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none;color:#374151;" onfocus="this.style.borderColor='#8F61F7'" onblur="this.style.borderColor='#e5e7eb'" onkeydown="if(event.key==='Enter')askRobQuestion()">
-        <button onclick="askRobQuestion()" style="padding:10px 14px;background:linear-gradient(135deg,#2C00CB,#8F61F7);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;">Ask →</button>
+    <div id="rob-chat" style="flex:1;overflow-y:auto;margin-bottom:12px;display:flex;flex-direction:column;gap:10px;min-height:80px;max-height:300px;">
+      <div style="background:#f0f0ff;border-radius:12px 12px 12px 2px;padding:12px 14px;font-size:13px;color:#374151;line-height:1.6;align-self:flex-start;max-width:90%;">
+        👋 Hi, I'm Rob — your business coach. Ask me anything: pricing, getting clients, marketing, confidence, positioning, growing your business. What's on your mind?
       </div>
     </div>
 
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#9ca3af;margin-bottom:8px;">Quick questions</div>
-    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
-      ${tips.map((t,i) => `
-        <button onclick="showRobAnswer(${i})" style="text-align:left;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 12px;font-size:13px;color:#374151;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#8F61F7';this.style.background='#faf5ff';" onmouseout="this.style.borderColor='#e5e7eb';this.style.background='#fff';">
-          💬 ${t.q}
-        </button>
-      `).join('')}
+    <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="rob-question-input" placeholder="Type your question…" style="flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:13px;outline:none;color:#374151;" onfocus="this.style.borderColor='#8F61F7'" onblur="this.style.borderColor='#e5e7eb'" onkeydown="if(event.key==='Enter')askRobQuestion()">
+        <button onclick="askRobQuestion()" style="padding:10px 16px;background:linear-gradient(135deg,#2C00CB,#8F61F7);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;">Send</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${tips.slice(0,3).map(t => `<button onclick="document.getElementById('rob-question-input').value='${t.q.replace(/'/g,"\\'")}';askRobQuestion();" style="font-size:11px;padding:5px 10px;background:#f5f3ff;border:1px solid #DDD6FE;border-radius:20px;cursor:pointer;color:#5B21B6;white-space:nowrap;">${t.q}</button>`).join('')}
+      </div>
+      ${!hasKey ? `<div style="font-size:11px;color:#9ca3af;text-align:center;padding-top:4px;">💡 Add a Claude API key in Settings → Connections for AI-powered answers</div>` : ''}
     </div>
-    <div id="rob-answer" style="display:none;background:#f5f3ff;border-left:3px solid #8F61F7;border-radius:0 10px 10px 0;padding:12px 14px;font-size:13px;color:#374151;line-height:1.7;"></div>
   `;
 }
 
@@ -7786,13 +7851,17 @@ function showRobAnswer(idx) {
   const tips = ROB_TIPS[robContext] || ROB_TIPS.default;
   const tip = tips[idx];
   if (!tip) return;
-  const ans = document.getElementById('rob-answer');
-  if (ans) {
-    ans.style.display = 'block';
-    ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>' + tip.a;
-    ans.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const chat = document.getElementById('rob-chat');
+  if (chat) {
+    const bubble = document.createElement('div');
+    bubble.style.cssText = 'background:#f0f0ff;border-radius:12px 12px 12px 2px;padding:12px 14px;font-size:13px;color:#374151;line-height:1.5;max-width:90%;align-self:flex-start;';
+    bubble.innerHTML = '<strong style="color:#2C00CB;font-size:11px;display:block;margin-bottom:4px;">ROB</strong>' + tip.a;
+    chat.appendChild(bubble);
+    chat.scrollTop = chat.scrollHeight;
   }
 }
+
+let robChatHistory = [];
 
 const ROB_SMART_ANSWERS = [
   { keys: ['save','saving','lost','losing','progress'], a: "Your work saves automatically every time you move between steps. If you close the browser and come back, just log in again and you'll land right back where you were." },
@@ -7814,36 +7883,62 @@ async function askRobQuestion() {
   const q = input.value.trim();
   if (!q) return;
   const ql = q.toLowerCase();
+  const chat = document.getElementById('rob-chat');
+  if (!chat) return;
 
-  const ans = document.getElementById('rob-answer');
-  if (!ans) return;
-
-  // Show loading state
-  ans.style.display = 'block';
-  ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong><span style="color:#9ca3af;font-style:italic;">Thinking…</span>';
   input.value = '';
+  input.disabled = true;
+
+  // Add user bubble
+  const userBubble = document.createElement('div');
+  userBubble.style.cssText = 'background:#2C00CB;border-radius:12px 12px 2px 12px;padding:10px 14px;font-size:13px;color:#fff;line-height:1.5;max-width:85%;align-self:flex-end;word-break:break-word;';
+  userBubble.textContent = q;
+  chat.appendChild(userBubble);
+
+  // Add thinking bubble
+  const thinkBubble = document.createElement('div');
+  thinkBubble.style.cssText = 'background:#f0f0ff;border-radius:12px 12px 12px 2px;padding:10px 14px;font-size:13px;color:#9ca3af;font-style:italic;max-width:90%;align-self:flex-start;';
+  thinkBubble.innerHTML = '<strong style="color:#2C00CB;font-size:11px;display:block;margin-bottom:3px;font-style:normal;">ROB</strong>Thinking…';
+  chat.appendChild(thinkBubble);
+  chat.scrollTop = chat.scrollHeight;
+
+  // Helper to replace thinking bubble with Rob's answer
+  function showRobBubble(text) {
+    thinkBubble.style.color = '#374151';
+    thinkBubble.style.fontStyle = 'normal';
+    thinkBubble.innerHTML = '<strong style="color:#2C00CB;font-size:11px;display:block;margin-bottom:3px;">ROB</strong>' + text.replace(/\n/g,'<br>');
+    chat.scrollTop = chat.scrollHeight;
+    input.disabled = false;
+    input.focus();
+  }
 
   // Try Claude API if key is available
   const apiKey = (typeof CONFIG !== 'undefined') && CONFIG.claudeApiKey;
   if (apiKey) {
     try {
       const contextParts = [];
-      if (wzData && wzData.practice_types && wzData.practice_types.length) contextParts.push('Practice: ' + wzData.practice_types.join(', '));
+      if (wzData && wzData.practice_types && wzData.practice_types.length) contextParts.push('Modality: ' + wzData.practice_types.join(', '));
       if (wzData && wzData.niche_statement) contextParts.push('Niche: ' + wzData.niche_statement);
       if (wzData && wzData.brand_what_you_do) contextParts.push('What they do: ' + wzData.brand_what_you_do);
-      if (PROFILE && PROFILE.practice_name) contextParts.push('Business: ' + PROFILE.practice_name);
-      const ctxStr = contextParts.length ? ' Context: ' + contextParts.join('. ') + '.' : '';
-      const systemPrompt = 'You are Rob, a friendly and knowledgeable business coach for UK health and wellness practitioners using PlenusOS. Give warm, practical, specific advice in plain UK English. Keep answers to 2-4 sentences. No bullet points. Be encouraging but direct. End with one concrete next step.' + ctxStr;
+      if (wzData && wzData.ic_name) contextParts.push('Ideal client: ' + wzData.ic_name);
+      if (PROFILE && PROFILE.practice_name) contextParts.push('Business name: ' + PROFILE.practice_name);
+      const ctxStr = contextParts.length ? '\n\nPractitioner context: ' + contextParts.join('. ') + '.' : '';
+      const systemPrompt = 'You are Rob, a warm and direct business coach for UK health and wellness practitioners using PlenusOS — a business management platform built specifically for this sector. You understand the realities of running a health business in the UK: pricing pressure, NHS comparison, client trust, solo practice challenges, and the emotional weight of client work.\n\nGive practical, specific, encouraging advice in plain UK English. Speak like a coach who knows their stuff, not a chatbot. Use 2–5 sentences. Avoid bullet points — write in flowing paragraphs. End each response with one concrete next step or question that moves the practitioner forward. Never be vague. If you do not know something, say so honestly.\n\nAlways use the word "business" rather than "practice".' + ctxStr;
+
+      // Build conversation history for multi-turn
+      robChatHistory.push({ role: 'user', content: q });
+      if (robChatHistory.length > 20) robChatHistory = robChatHistory.slice(-20);
+
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 250, system: systemPrompt, messages: [{ role: 'user', content: q }] })
+        body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 600, system: systemPrompt, messages: robChatHistory })
       });
       const data = await res.json();
       const text = data.content && data.content[0] && data.content[0].text;
       if (text) {
-        ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>' + text.replace(/\n/g, '<br>');
-        ans.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        robChatHistory.push({ role: 'assistant', content: text });
+        showRobBubble(text);
         return;
       }
     } catch(e) { /* fall through to keyword matching */ }
@@ -7865,29 +7960,35 @@ async function askRobQuestion() {
   }
 
   if (best && bestScore > 0) {
-    ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>' + best.a;
-  } else {
-    // Try a smarter fallback based on question keywords
-    const fallbacks = [
-      { keys: ['price','charge','cost','fee','worth','rate','how much'], a: "Pricing is one of the hardest things to get right. A useful starting point: look at what a client pays you versus what they save in NHS appointments, sick days, or failed approaches over the next year. Most practitioners undercharge because they compare themselves to other practitioners rather than to the value of the result. What outcome does your work create — and what is that worth to someone who really needs it?" },
-      { keys: ['market','attract','get clients','find clients','social','instagram','post'], a: "The most effective marketing for a health practitioner isn't social media volume — it's specificity. One clear sentence about exactly who you help and exactly what changes for them will outperform 50 generic posts. Your niche and ideal client answers in the wizard feed directly into your website and content. Have you completed those steps yet? That's where to start." },
-      { keys: ['confidence','scared','nervous','afraid','imposter','ready','start'], a: "This is incredibly common and it doesn't go away completely — but it does get quieter. The practitioners who build thriving businesses are not the most confident ones, they're the most consistent ones. The setup wizard is designed so you can start very small and grow from there. You don't need everything perfect before you begin. What's the one first step that feels manageable?" },
-      { keys: ['niche','specialism','focus','specific','narrow','general'], a: "Narrowing your niche feels counterintuitive — it feels like turning clients away. But the opposite is true. The more specific you are about who you help and what you do, the more clearly your ideal client recognises themselves in your message and reaches out. 'Nutritional therapist for women in perimenopause' will convert better than 'nutritional therapist for everyone'. What group do you do your very best work with?" },
-      { keys: ['website','online','presence','google','seo','visible'], a: "Before you worry about Google or SEO, focus on having one very clear page that speaks directly to your ideal client. The website builder here will generate the copy once you've completed your brand and niche steps. The most important thing on the page is a single clear headline that says who you help and what changes for them — and a very easy way to book a call." },
-      { keys: ['testimonial','review','case study','proof','evidence'], a: "Social proof is powerful but most practitioners wait too long to ask for it. As soon as a client gets a result, ask them: 'Would you be willing to share what shifted for you in a sentence or two?' Most people are happy to. Even one or two honest testimonials — specific about the result — will do more for your conversion than any amount of credentials." },
-      { keys: ['discovery call','consultation','free','intro','first session'], a: "A free discovery call is one of the most effective tools you have — not to sell, but to listen. The goal is to understand exactly where the person is and whether you're the right fit. Ask what they've already tried, what's at stake if nothing changes, and what success looks like. When you listen well, the right clients self-select. Keep it to 20 minutes." }
-    ];
-    let matched = null;
-    for (const fb of fallbacks) {
-      if (fb.keys.some(k => ql.includes(k))) { matched = fb; break; }
-    }
-    if (matched) {
-      ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>' + matched.a;
-    } else {
-      ans.innerHTML = '<strong style="color:#2C00CB;display:block;margin-bottom:4px;">Rob says:</strong>That\'s a great question. The most important thing you can do right now is answer each section of the wizard as specifically as possible — vague answers lead to vague suggestions, and the more specific you are, the better PlenusOS can tailor everything to your business. Start with who you help and what they\'re struggling with, and everything else will flow from there.';
-    }
+    showRobBubble(best.a);
+    return;
   }
-  ans.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Extended keyword fallbacks
+  const fallbacks = [
+    { keys: ['price','charge','cost','fee','worth','rate','how much'], a: "Pricing is one of the hardest things to get right. A useful starting point: look at what a client pays you versus what they save in NHS appointments, sick days, or failed approaches over the next year. Most practitioners undercharge because they compare themselves to other practitioners rather than to the value of the result. What outcome does your work create — and what is that worth to someone who really needs it?" },
+    { keys: ['market','attract','get clients','find clients','social','instagram','post'], a: "The most effective marketing for a health practitioner isn't social media volume — it's specificity. One clear sentence about exactly who you help and exactly what changes for them will outperform 50 generic posts. Your niche and ideal client answers in the wizard feed directly into your website and content. Have you completed those steps yet? That's where to start." },
+    { keys: ['confidence','scared','nervous','afraid','imposter','ready','start'], a: "This is incredibly common and it doesn't go away completely — but it does get quieter. The practitioners who build thriving businesses are not the most confident ones, they're the most consistent ones. The setup wizard is designed so you can start very small and grow from there. You don't need everything perfect before you begin. What's the one first step that feels manageable?" },
+    { keys: ['niche','specialism','focus','specific','narrow','general'], a: "Narrowing your niche feels counterintuitive — it feels like turning clients away. But the opposite is true. The more specific you are about who you help and what you do, the more clearly your ideal client recognises themselves in your message and reaches out. 'Nutritional therapist for women in perimenopause' will convert better than 'nutritional therapist for everyone'. What group do you do your very best work with?" },
+    { keys: ['website','online','presence','google','seo','visible'], a: "Before you worry about Google or SEO, focus on having one very clear page that speaks directly to your ideal client. The website builder here will generate the copy once you've completed your brand and niche steps. The most important thing on the page is a single clear headline that says who you help and what changes for them — and a very easy way to book a call." },
+    { keys: ['testimonial','review','case study','proof','evidence'], a: "Social proof is powerful but most practitioners wait too long to ask for it. As soon as a client gets a result, ask them: 'Would you be willing to share what shifted for you in a sentence or two?' Most people are happy to. Even one or two honest testimonials — specific about the result — will do more for your conversion than any amount of credentials." },
+    { keys: ['discovery call','consultation','free','intro','first session'], a: "A free discovery call is one of the most effective tools you have — not to sell, but to listen. The goal is to understand exactly where the person is and whether you're the right fit. Ask what they've already tried, what's at stake if nothing changes, and what success looks like. When you listen well, the right clients self-select. Keep it to 20 minutes." }
+  ];
+  let matched = null;
+  for (const fb of fallbacks) {
+    if (fb.keys.some(k => ql.includes(k))) { matched = fb; break; }
+  }
+  if (matched) {
+    showRobBubble(matched.a);
+  } else {
+    // No keyword match — give a genuinely useful response based on what was asked,
+    // and let the user know how to unlock full AI answers
+    const hasKey = (typeof CONFIG !== 'undefined') && CONFIG.claudeApiKey;
+    const googleQ = encodeURIComponent(q + ' UK health practitioner business');
+    const googleLink = '<br><br><a href="https://www.google.com/search?q=' + googleQ + '" target="_blank" rel="noopener" style="color:#2C00CB;font-weight:700;text-decoration:underline;">🔍 Search Google for this →</a>';
+    const noKeyNote = hasKey ? '' : '<br><br>💡 <em>Add your Claude API key in Settings → Integrations to get full AI-powered answers here.</em>';
+    showRobBubble("I want to give you a genuinely useful answer — can you be a bit more specific? If you're asking about pricing, clients, marketing, or your business setup, rephrase and I'll do my best to help." + googleLink + noKeyNote);
+  }
 }
 // ══════════════════════════════════════
 // SETTINGS SECTION COMPLETION
@@ -7899,14 +8000,38 @@ function markSettingsSectionDone(n) {
   if (iconEl) { iconEl.textContent='✓'; iconEl.style.background='#10B981'; iconEl.style.color='#fff'; }
 }
 
-function saveBrandSettings() {
-  const primary   = document.getElementById('brand-primary-color')?.value   || '';
-  const secondary = document.getElementById('brand-secondary-color')?.value || '';
-  if (primary)   document.documentElement.style.setProperty('--violet', primary);
-  if (secondary) document.documentElement.style.setProperty('--charcoal', secondary);
+function uploadSettingsLogo(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    if (!wzData) window.wzData = {};
+    wzData.logo_url = e.target.result;
+    debounceAutosave();
+    showToast('✅ Logo uploaded!');
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function saveBrandSettings() {
+  const primary = document.getElementById('brand-primary-color')?.value || '#2C00CB';
+  const accent  = document.getElementById('brand-accent-color')?.value  || '#8F61F7';
+  const bg      = document.getElementById('brand-bg-color')?.value      || '#F5F3FF';
+  const font    = document.getElementById('brand-font-select')?.value   || 'inter';
+  // Apply to UI immediately
+  document.documentElement.style.setProperty('--violet', primary);
+  document.documentElement.style.setProperty('--violet-light', accent);
+  // Save to wzData
   if (!wzData) window.wzData = {};
-  wzData.brand_palette = primary || '#2C00CB';
-  try { localStorage.setItem('plenusos_brand', JSON.stringify({ primary, secondary })); } catch(e) {}
+  wzData.brand_custom_swatches = [primary, accent, bg];
+  wzData.brand_fonts = font;
+  // Save to localStorage
+  try { localStorage.setItem('plenusos_brand', JSON.stringify({ primary, accent, bg, font })); } catch(e) {}
+  // Save to Supabase
+  if (sb && currentUser) {
+    try {
+      await profileSave({ brand_custom_swatches: [primary, accent, bg], brand_fonts: font });
+    } catch(e) { console.warn('Brand save to Supabase failed:', e); }
+  }
   markSettingsSectionDone(2);
   showToast('✅ Brand colours saved!');
   updateSidebarSteps();
@@ -8225,44 +8350,127 @@ function uploadWbHeroBg(input) {
   reader.readAsDataURL(file);
 }
 
+function toggleHeroImagePicker() {
+  const p = document.getElementById('wb-img-picker');
+  if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+function setHeroBgUrl(url) {
+  const overlay = document.getElementById('wb-hero-bg-overlay');
+  if (overlay) {
+    overlay.style.backgroundImage = 'url(' + url + ')';
+    overlay.style.display = 'block';
+  }
+  document.getElementById('wb-img-picker').style.display = 'none';
+  showToast('\u2705 Background image set');
+}
+
 function refreshWebsiteFromProfile() {
   if (!wzData && !PROFILE) return;
-  const practiceName = (PROFILE && PROFILE.practice_name) || (wzData && wzData.practice_name) || 'Your Practice';
-  const name         = (PROFILE && PROFILE.name)          || '';
+  const practiceName = (PROFILE && PROFILE.practice_name) || (wzData && wzData.practice_name) || '';
+  const name         = (PROFILE && PROFILE.name) || (wzData && wzData.name) || '';
   const whatYouDo    = (wzData && wzData.brand_what_you_do) || (wzData && wzData.niche_statement) || '';
-  const personalBio  = (wzData && wzData.personal_bio) || '';
-  const storyQ1      = (wzData && wzData.story_q1) || (PROFILE && PROFILE.qualifications) || '';
+  const personalBio  = (wzData && wzData.about_draft) || (wzData && wzData.personal_bio) || '';
+  const quals        = (PROFILE && PROFILE.qualifications) || (wzData && wzData.accreditations_other) || '';
+  const location     = (PROFILE && PROFILE.work_location_city) || (wzData && wzData.work_location_city) || '';
+
+  // Business name in navbar
+  const siteName = document.getElementById('wb-site-name');
+  if (siteName && practiceName) siteName.textContent = practiceName;
+
+  // Logo initial
+  const logoLetter = document.getElementById('wb-logo-letter');
+  if (logoLetter && practiceName) logoLetter.textContent = practiceName[0].toUpperCase();
+
   const heroH1 = document.getElementById('wb-hero-h1');
   const heroP  = document.getElementById('wb-hero-p');
   const aboutH = document.getElementById('wb-about-h');
   const aboutP = document.getElementById('wb-about-p');
-  if (heroH1 && heroH1.textContent.includes('Transform Your Health')) {
-    heroH1.textContent = practiceName || 'Welcome to My Practice';
+
+  // Hero \u2014 only replace placeholder text, not user-edited content
+  if (heroH1 && heroH1.textContent.trim() === 'Your headline goes here' && practiceName) {
+    heroH1.textContent = practiceName;
   }
-  if (heroP && whatYouDo && heroP.textContent.includes('busy women')) {
+  if (heroP && heroP.textContent.includes('AI Rewrite') && whatYouDo) {
     heroP.textContent = whatYouDo;
   }
-  if (aboutH && name && aboutH.textContent.includes('Helen')) {
+
+  // About heading
+  if (aboutH && aboutH.textContent.includes('[Your Name]') && name) {
     aboutH.textContent = 'Hi, I\u2019m ' + name;
   }
-  // Use personal bio for About if available, otherwise fall back to story q1
-  const aboutText = personalBio || storyQ1;
-  if (aboutP && aboutText && aboutText.length > 20 && aboutP.textContent.includes('registered nutritional')) {
-    aboutP.textContent = aboutText;
+  // About paragraph \u2014 pull from wizard bio/story, never use fake text
+  if (aboutP && aboutP.textContent.includes('AI Rewrite') && personalBio && personalBio.length > 20) {
+    aboutP.textContent = personalBio;
+  }
+
+  // Trust bar \u2014 location
+  const trustLoc = document.getElementById('wb-trust-location');
+  if (trustLoc && location) trustLoc.textContent = location + '-based';
+
+  // Qualification chips \u2014 only show REAL qualifications from their profile
+  const qualsChips = document.getElementById('wb-quals-chips');
+  if (qualsChips) {
+    const accreds = (wzData && wzData.accreditations) || [];
+    const customQuals = quals ? quals.split(/[,;]+/).map(q => q.trim()).filter(Boolean) : [];
+    const allQuals = [...accreds, ...customQuals].filter(Boolean);
+    if (allQuals.length > 0) {
+      qualsChips.innerHTML = allQuals.map(q =>
+        `<div style="padding:6px 12px;background:#F5F3FF;border-radius:20px;font-size:11px;color:var(--violet);font-weight:600;" contenteditable="true">${q}</div>`
+      ).join('');
+    }
+    // Trust bar quals
+    const trustQuals = document.getElementById('wb-trust-quals');
+    if (trustQuals && allQuals.length > 0) {
+      trustQuals.innerHTML = '<span>\ud83c\udf93</span><span contenteditable="true">' + allQuals.join(', ') + '</span>';
+    }
   }
   // Populate services from wzData
   const services = wzData && wzData.services ? wzData.services.filter(s => s.name) : [];
   if (services.length > 0) {
     const grid = document.querySelector('.wb-service-grid');
     if (grid) {
-      const icons = ['🌱','🔬','🎓','✨','💛','🌿'];
-      grid.innerHTML = services.slice(0,3).map((s, i) => `
-        <div class="wb-service-card">
-          <div style="font-size:28px;">${icons[i % icons.length]}</div>
-          <h4 contenteditable="true">${s.name}</h4>
-          <p contenteditable="true">${s.description || 'A personalised ' + (s.duration || 'session') + ' session tailored to your needs.'}</p>
-          <div style="margin-top:10px;font-weight:800;color:var(--violet);" contenteditable="true">${s.price ? '\u00a3' + s.price + (s.price_type ? ' ' + s.price_type.toLowerCase() : '') : 'Contact for pricing'}</div>
-        </div>`).join('');
+      // Smart icon based on service name keywords
+      function svcIcon(name) {
+        const n = (name || '').toLowerCase();
+        if (/consult|intro|chat|discuss|meet|discover/.test(n)) return '💬';
+        if (/gut|digest|ibs|bowel|bloat/.test(n)) return '🌿';
+        if (/weight|slim|fat|metabol|reset|transform/.test(n)) return '⚡';
+        if (/hormone|meno|thyroid|pcos|period|cycle|fertility/.test(n)) return '🌸';
+        if (/programme|program|week|month|journey|package/.test(n)) return '📋';
+        if (/energy|fatigue|tired|chronic/.test(n)) return '✨';
+        if (/anxiety|stress|mental|mood|brain|focus/.test(n)) return '🧠';
+        if (/skin|eczema|acne|inflam/.test(n)) return '🌻';
+        if (/course|class|group|workshop|online/.test(n)) return '🎓';
+        if (/follow|check|review|support/.test(n)) return '🔄';
+        return '💛';
+      }
+      // Format descriptions — break run-on bullet text into a proper list
+      function fmtDesc(desc, duration) {
+        if (!desc) return 'A personalised ' + (duration || 'session') + ' tailored to your needs.';
+        const lines = desc.split(/(?<=[a-z.!?])\s+(?=[A-Z])/).filter(Boolean);
+        if (lines.length > 2) {
+          return '<ul style="margin:6px 0 0 14px;padding:0;font-size:12px;color:var(--grey-500);line-height:1.7;">' +
+            lines.map(l => '<li>' + l + '</li>').join('') + '</ul>';
+        }
+        return desc;
+      }
+      grid.innerHTML = services.map(s => {
+        const icon = svcIcon(s.name);
+        const desc = fmtDesc(s.description, s.duration);
+        const priceStr = s.price ? '£' + s.price + (s.price_type ? ' ' + s.price_type.toLowerCase() : '') : 'Contact for pricing';
+        const badges = [];
+        if (s.sliding_scale) badges.push('<span class="svc-badge" style="color:#059669;border-color:#86efac;">Sliding scale</span>');
+        if (s.payment_plan)  badges.push('<span class="svc-badge" style="color:#2563eb;border-color:#93c5fd;">Payment plan</span>');
+        return `<div class="wb-service-card">
+          <div style="font-size:32px;line-height:1;">${icon}</div>
+          <h4>${s.name}</h4>
+          <div class="svc-meta">${s.duration ? '<span>' + s.duration + '</span>' : ''}${s.delivery ? '<span>' + s.delivery + '</span>' : ''}</div>
+          <p style="margin-top:8px;">${desc}</p>
+          ${badges.length ? '<div class="svc-badges">' + badges.join('') + '</div>' : ''}
+          <div class="svc-price">${priceStr}</div>
+        </div>`;
+      }).join('');
     }
   }
 }
